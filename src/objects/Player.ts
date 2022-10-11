@@ -11,6 +11,7 @@ export class Player extends StateMachine {
   scene: GameScene;
   hp: number = 100;
   hpText!: Phaser.GameObjects.Text;
+  hpBar: any;
   controls: controls;
   damageTakenRecently: boolean = false;
 
@@ -20,6 +21,8 @@ export class Player extends StateMachine {
     scene.load.atlas('walk', 'assets/walk.png', 'assets/walk.json');
     scene.load.atlas('idle', 'assets/idle.png', 'assets/idle.json');
     scene.load.atlas('jump', 'assets/jump.png', 'assets/jump.json');
+
+    scene.load.audio('spearattack', ['sfx/attack.mp3']);
   }
 
   constructor(id: string, scene: GameScene, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, controls: controls) {
@@ -214,14 +217,13 @@ export class Player extends StateMachine {
     if (this.controls.attack.isDown) {
       this.setState('stab');
     }
-
-    // if (this.playerSprite.body.velocity.y === 0 && this.playerSprite.body.velocity.x === 0 && this.playerSprite.body.onFloor()) {
-    //   this.setState('idle');
-    // }
   }
 
   onStabEnter() {
     this.playerSprite.play('stab');
+    this.scene.sound.play('spearattack', {
+      volume: 0.2
+    });
   }
 
   onStabUpdate() {
@@ -243,7 +245,7 @@ export class Player extends StateMachine {
     }
   }
 
-  onDamageTaken = () => {
+  onDamageTaken = (object1: any, player: any) => {
     if (!this.damageTakenRecently) {
       this.hp -= 10;
       this.hpText.text = `HP: ${this.hp}`;
@@ -262,6 +264,7 @@ export class Player extends StateMachine {
 
       this.scene.time.delayedCall(1000, () => {
         this.damageTakenRecently = false;
+        this.playerSprite.alpha = 1;
         this.scene.tweens.remove(tween);
         this.playerSprite.setTint(0xffffff);
       })
