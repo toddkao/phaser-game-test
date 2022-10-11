@@ -8,10 +8,11 @@ export interface controls {
 export class Player extends StateMachine {
   playerSprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   attackZone!: Phaser.GameObjects.GameObject;
-  context: GameScene;
+  scene: GameScene;
   hp: number = 100;
   hpText!: Phaser.GameObjects.Text;
   controls: controls;
+  damageTakenRecently: boolean = false;
 
   static preload(scene: Phaser.Scene) {
     scene.load.atlas('swing', 'assets/swing.png', 'assets/swing.json');
@@ -21,9 +22,9 @@ export class Player extends StateMachine {
     scene.load.atlas('jump', 'assets/jump.png', 'assets/jump.json');
   }
 
-  constructor(id: string, context: GameScene, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, controls: controls) {
-    super(context, id);
-    this.context = context;
+  constructor(id: string, scene: GameScene, sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, controls: controls) {
+    super(scene, id);
+    this.scene = scene;
     this.controls = controls;
     this.playerSprite = sprite;
     this.onCreate();
@@ -53,9 +54,9 @@ export class Player extends StateMachine {
   }
 
   createAnimations() {
-    this.context.anims.create({
+    this.scene.anims.create({
       key: 'idle',
-      frames: this.context.anims.generateFrameNames(
+      frames: this.scene.anims.generateFrameNames(
         'idle',
         {
           start: 0,
@@ -69,9 +70,9 @@ export class Player extends StateMachine {
     })
 
         
-    this.context.anims.create({
+    this.scene.anims.create({
       key: 'jump',
-      frames: this.context.anims.generateFrameNames(
+      frames: this.scene.anims.generateFrameNames(
         'jump',
         {
           start: 1,
@@ -84,9 +85,9 @@ export class Player extends StateMachine {
       repeat: -1,
     })
 
-    this.context.anims.create({
+    this.scene.anims.create({
       key: 'swing',
-      frames: this.context.anims.generateFrameNames(
+      frames: this.scene.anims.generateFrameNames(
         'swing',
         {
           start: 1,
@@ -99,9 +100,9 @@ export class Player extends StateMachine {
       repeat: 0,
     });
 
-    this.context.anims.create({
+    this.scene.anims.create({
       key: 'stab',
-      frames: this.context.anims.generateFrameNames(
+      frames: this.scene.anims.generateFrameNames(
         'stab',
         {
           start: 0,
@@ -114,9 +115,9 @@ export class Player extends StateMachine {
       repeat: 0,
     });
 
-    this.context.anims.create({
+    this.scene.anims.create({
       key: 'walk',
-      frames: this.context.anims.generateFrameNames(
+      frames: this.scene.anims.generateFrameNames(
         'walk',
         {
           start: 1,
@@ -135,33 +136,15 @@ export class Player extends StateMachine {
     this.playerSprite.body.collideWorldBounds = true;
     this.playerSprite.setScale(2, 2);
 
-    this.attackZone = this.context.add.rectangle(0, 0, 32, 64, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+    this.playerSprite.body.checkCollision.up = false;
+    this.playerSprite.body.checkCollision.left = false;
+    this.playerSprite.body.checkCollision.right = false;
 
-    this.hpText = this.context.add.text(this.playerSprite.x, this.playerSprite.y - 90, `HP: ${this.hp}`)
-    .setOrigin(0.5);
-
-
-    this.playerSprite.on('animationupdate', (anim, frame, sprite, frameKey)=> {
-      if (anim.key === 'stab') {
-        // this.context.physics.world.disable(this.attackZone);
-        console.log(frame.index);
-        // if(frame.index == 1) {
-        //   this.attackZone.x = this.playerSprite.x
-        //   this.attackZone.y = this.playerSprite.y
-        // }
-        // if(frame.index == 2) {
-        //   this.attackZone.x = this.playerSprite.x;
-        //   this.attackZone.y = this.playerSprite.y - 20
-        //   this.attackZone.body.height = 84;
-        // }
-        // if(frame.index == 3) {
-        //   this.attackZone.x = this.playerSprite.x;
-        //   this.attackZone.y = this.playerSprite.y;
-        //   this.attackZone.body.height = 32
-        // }
-      }
-    });
-
+    this.attackZone = this.scene.add.rectangle(-1000, -1000, 70, 25, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+    this.scene.physics.add.existing(this.attackZone);
+    (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = false;
+  
+    this.hpText = this.scene.add.text(this.playerSprite.x, this.playerSprite.y - 90, `HP: ${this.hp}`).setOrigin(0.5);
   }
 
   onUpdate(dt: number) {
@@ -239,40 +222,49 @@ export class Player extends StateMachine {
 
   onStabEnter() {
     this.playerSprite.play('stab');
-
-    // TODO: move sword swing hitbox into place
-    // does it need to start part way into the animation?
-    // const startHit = (anim: Phaser.Animations.Animation, frame: Phaser.Animations.AnimationFrame) => {
-    //   if (frame.index < 5) {
-    //     return
-    //   }
-
-    //   this.playerSprite.off(Phaser.Animations.Events.ANIMATION_UPDATE, startHit)
-
-    //   this.swordHitbox.x = this.knight.flipX
-    //     ? this.knight.x - this.knight.width * 0.25
-    //     : this.knight.x + this.knight.width * 0.25
-
-    //   this.swordHitbox.y = this.knight.y + this.knight.height * 0.2
-
-    //   this.swordHitbox.body.enable = true
-    //   this.physics.world.add(this.swordHitbox.body)
-    // }
-
-    // this.knight.on(Phaser.Animations.Events.ANIMATION_UPDATE, startHit)
-
-    // this.knight.once(Phaser.Animations.Events.ANIMATION_COMPLETE_KEY + 'attack', () => {
-    //   this.knightStateMachine.setState('idle')
-
-    //   // TODO: hide and remove the sword swing hitbox
-    //   this.swordHitbox.body.enable = false
-    //   this.physics.world.remove(this.swordHitbox.body)
-    // })
   }
 
   onStabUpdate() {
+    const startHit = (anim: Phaser.Animations.Animation, frame: Phaser.Animations.AnimationFrame) => {
+      this.playerSprite.off(Phaser.Animations.Events.ANIMATION_UPDATE, startHit)
+
+      this.attackZone.x = this.playerSprite.x + (this.playerSprite.flipX ? 70 : -70);
+      this.attackZone.y = this.playerSprite.y + 20;
+
+      (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = true;
+      this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
+    }
+
+    startHit(this.playerSprite.anims, this.playerSprite.anims.currentFrame);
     if (this.playerSprite.anims.currentFrame.index === 3) {
       this.setState('idle');
+      (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = false;
+      this.scene.physics.world.remove(this.attackZone.body);
+    }
+  }
+
+  onDamageTaken = () => {
+    if (!this.damageTakenRecently) {
+      this.hp -= 10;
+      this.hpText.text = `HP: ${this.hp}`;
+      this.damageTakenRecently = true;
+
+      this.playerSprite.setTint(0xFF0000);
+
+      const tween = this.scene.tweens.add({
+        targets: this.playerSprite,
+        alpha: 0.5,
+        ease: 'Cubic.easeOut',  
+        duration: 500,
+        repeat: -1,
+        yoyo: true
+      });
+
+      this.scene.time.delayedCall(1000, () => {
+        this.damageTakenRecently = false;
+        this.scene.tweens.remove(tween);
+        this.playerSprite.setTint(0xffffff);
+      })
     }
   }
 }

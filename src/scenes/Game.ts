@@ -41,10 +41,10 @@ export class GameScene extends Phaser.Scene {
     }) as controls;
 
     const controls2 = this.input.keyboard.addKeys({
-      attack: Phaser.Input.Keyboard.KeyCodes.U,
-      jump: Phaser.Input.Keyboard.KeyCodes.J,
-      right: Phaser.Input.Keyboard.KeyCodes.K,
-      left: Phaser.Input.Keyboard.KeyCodes.L,
+      attack: Phaser.Input.Keyboard.KeyCodes.H,
+      jump: Phaser.Input.Keyboard.KeyCodes.I,
+      right: Phaser.Input.Keyboard.KeyCodes.L,
+      left: Phaser.Input.Keyboard.KeyCodes.J,
     }) as controls;
 
     const playerSprite = this.physics.add.sprite(200, 400, 'idle');
@@ -54,9 +54,9 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.collider(layer, playerSprite);
     this.physics.add.collider(layer, playerSprite2);
-    playerSprite.body.checkCollision.up = false;
-    playerSprite.body.checkCollision.left = false;
-    playerSprite.body.checkCollision.right = false;
+
+    this.physics.add.overlap(this.player1.attackZone, playerSprite2, this.player2.onDamageTaken);
+    this.physics.add.overlap(this.player2.attackZone, playerSprite, this.player1.onDamageTaken);
   }
 
   update(t: number, dt: number) {

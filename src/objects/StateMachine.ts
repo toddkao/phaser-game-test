@@ -9,7 +9,7 @@ let idCount = 0
 
 export class StateMachine {
   private id = (++idCount).toString()
-  context?: object
+  scene?: object
   private states = new Map<string, IState>()
 
   private previousState?: IState
@@ -27,7 +27,7 @@ export class StateMachine {
 
   constructor(context?: object, id?: string) {
     this.id = id ?? this.id;
-    this.context = context;
+    this.scene = context;
   }
 
   isCurrentState(name: string) {
@@ -39,7 +39,7 @@ export class StateMachine {
   }
 
   addState(name: string, config?: { onEnter?: () => void, onUpdate?: (dt: number) => void, onExit?: () => void }) {
-    const context = this.context
+    const context = this.scene
     this.states.set(name, {
       name,
       onEnter: config?.onEnter?.bind(context),
