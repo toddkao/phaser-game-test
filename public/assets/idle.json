@@ -1,0 +1,103 @@
+{
+	"textures": [
+		{
+			"image": "idle",
+			"format": "RGBA8888",
+			"size": {
+				"w": 57,
+				"h": 304
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "stand1_0.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 57,
+						"h": 76
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 57,
+						"h": 76
+					},
+					"frame": {
+						"x": 0,
+						"y": 0,
+						"w": 57,
+						"h": 76
+					}
+				},
+				{
+					"filename": "stand1_1.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 57,
+						"h": 76
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 57,
+						"h": 76
+					},
+					"frame": {
+						"x": 0,
+						"y": 76,
+						"w": 57,
+						"h": 76
+					}
+				},
+				{
+					"filename": "stand1_2.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 57,
+						"h": 76
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 57,
+						"h": 76
+					},
+					"frame": {
+						"x": 0,
+						"y": 152,
+						"w": 57,
+						"h": 76
+					}
+				},
+				{
+					"filename": "stand1_3.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 57,
+						"h": 76
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 57,
+						"h": 76
+					},
+					"frame": {
+						"x": 0,
+						"y": 228,
+						"w": 57,
+						"h": 76
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "http://free-tex-packer.com",
+		"version": "0.6.7"
+	}
+}

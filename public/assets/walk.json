@@ -1,0 +1,124 @@
+{
+	"textures": [
+		{
+			"image": "walk",
+			"format": "RGBA8888",
+			"size": {
+				"w": 367,
+				"h": 71
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "walk1_1.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 79,
+						"h": 70
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 79,
+						"h": 70
+					},
+					"frame": {
+						"x": 0,
+						"y": 0,
+						"w": 79,
+						"h": 70
+					}
+				},
+				{
+					"filename": "walk1_3.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 72,
+						"h": 70
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 72,
+						"h": 70
+					},
+					"frame": {
+						"x": 79,
+						"y": 0,
+						"w": 72,
+						"h": 70
+					}
+				},
+				{
+					"filename": "walk1_0.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 72,
+						"h": 71
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 72,
+						"h": 71
+					},
+					"frame": {
+						"x": 151,
+						"y": 0,
+						"w": 72,
+						"h": 71
+					}
+				},
+				{
+					"filename": "walk1_2.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 72,
+						"h": 71
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 72,
+						"h": 71
+					},
+					"frame": {
+						"x": 223,
+						"y": 0,
+						"w": 72,
+						"h": 71
+					}
+				},
+				{
+					"filename": "walk1_4.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 72,
+						"h": 71
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 72,
+						"h": 71
+					},
+					"frame": {
+						"x": 295,
+						"y": 0,
+						"w": 72,
+						"h": 71
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "http://free-tex-packer.com",
+		"version": "0.6.7"
+	}
+}

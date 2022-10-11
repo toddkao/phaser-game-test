@@ -1,0 +1,103 @@
+{
+	"textures": [
+		{
+			"image": "swing",
+			"format": "RGBA8888",
+			"size": {
+				"w": 188,
+				"h": 165
+			},
+			"scale": 1,
+			"frames": [
+				{
+					"filename": "swing3.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 99,
+						"h": 73
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 99,
+						"h": 73
+					},
+					"frame": {
+						"x": 0,
+						"y": 0,
+						"w": 99,
+						"h": 73
+					}
+				},
+				{
+					"filename": "swing2.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 46,
+						"h": 94
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 46,
+						"h": 94
+					},
+					"frame": {
+						"x": 99,
+						"y": 0,
+						"w": 46,
+						"h": 94
+					}
+				},
+				{
+					"filename": "swing1.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 94,
+						"h": 71
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 94,
+						"h": 71
+					},
+					"frame": {
+						"x": 0,
+						"y": 73,
+						"w": 94,
+						"h": 71
+					}
+				},
+				{
+					"filename": "swing4.png",
+					"rotated": false,
+					"trimmed": false,
+					"sourceSize": {
+						"w": 94,
+						"h": 71
+					},
+					"spriteSourceSize": {
+						"x": 0,
+						"y": 0,
+						"w": 94,
+						"h": 71
+					},
+					"frame": {
+						"x": 94,
+						"y": 94,
+						"w": 94,
+						"h": 71
+					}
+				}
+			]
+		}
+	],
+	"meta": {
+		"app": "http://free-tex-packer.com",
+		"version": "0.6.7"
+	}
+}
