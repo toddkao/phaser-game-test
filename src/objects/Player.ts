@@ -14,6 +14,7 @@ export class Player extends StateMachine {
   hpBar: any;
   controls: controls;
   damageTakenRecently: boolean = false;
+  attackGroup;
 
   static preload(scene: Phaser.Scene) {
     scene.load.atlas('swing', 'assets/swing.png', 'assets/swing.json');
@@ -143,9 +144,13 @@ export class Player extends StateMachine {
     this.playerSprite.body.checkCollision.left = false;
     this.playerSprite.body.checkCollision.right = false;
 
+    this.attackGroup = this.scene.physics.add.group({
+      immovable: true,
+      allowGravity: false,
+    })
+
     this.attackZone = this.scene.add.rectangle(-1000, -1000, 70, 25, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-    this.scene.physics.add.existing(this.attackZone);
-    (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = false;
+    this.attackGroup.add(this.attackZone);
   
     this.hpText = this.scene.add.text(this.playerSprite.x, this.playerSprite.y - 90, `HP: ${this.hp}`).setOrigin(0.5);
   }
@@ -224,22 +229,16 @@ export class Player extends StateMachine {
     this.scene.sound.play('spearattack', {
       volume: 0.2
     });
+    this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
   }
 
   onStabUpdate() {
-    const startHit = (anim: Phaser.Animations.Animation, frame: Phaser.Animations.AnimationFrame) => {
-      this.playerSprite.off(Phaser.Animations.Events.ANIMATION_UPDATE, startHit)
-
-      this.attackZone.x = this.playerSprite.x + (this.playerSprite.flipX ? 70 : -70);
-      this.attackZone.y = this.playerSprite.y + 20;
-
-      (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = true;
-      this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
-    }
-
-    startHit(this.playerSprite.anims, this.playerSprite.anims.currentFrame);
+    this.attackZone.x = this.playerSprite.x + (this.playerSprite.flipX ? 70 : -70);
+    this.attackZone.y = this.playerSprite.y + 20;
+    
     if (this.playerSprite.anims.currentFrame.index === 3) {
       this.setState('idle');
+      
       (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = false;
       this.scene.physics.world.remove(this.attackZone.body);
     }
