@@ -1,0 +1,88 @@
+{
+  "id": 1665457112785,
+  "type": "character",
+  "action": "stand1",
+  "emotion": "default",
+  "skin": 2000,
+  "zoom": 1,
+  "frame": 0,
+  "mercEars": false,
+  "illiumEars": false,
+  "selectedItems": {
+    "Body": {
+      "name": "Body",
+      "noIcon": true,
+      "id": 2000,
+      "region": "GMS",
+      "version": "235",
+      "typeInfo": {
+        "overallCategory": "Character",
+        "category": "Character",
+        "subCategory": "Body",
+        "lowItemId": 2000,
+        "highItemId": 2999
+      }
+    },
+    "Head": {
+      "name": "Head",
+      "noIcon": true,
+      "id": 12000,
+      "region": "GMS",
+      "version": "235",
+      "typeInfo": {
+        "overallCategory": "Character",
+        "category": "Character",
+        "subCategory": "Head",
+        "lowItemId": 12000,
+        "highItemId": 12999
+      }
+    },
+    "Hair": {
+      "requiredJobs": [
+        "Beginner"
+      ],
+      "isCash": true,
+      "requiredGender": 2,
+      "name": "Hitman Hair",
+      "desc": "",
+      "id": 60000,
+      "typeInfo": {
+        "overallCategory": "Equip",
+        "category": "Character",
+        "subCategory": "Hair",
+        "lowItemId": 60000,
+        "highItemId": 69999
+      },
+      "region": "GMS",
+      "version": "235"
+    },
+    "Face": {
+      "requiredJobs": [
+        "Beginner"
+      ],
+      "isCash": true,
+      "requiredGender": 2,
+      "name": "Ice King Face",
+      "desc": "",
+      "id": 50033,
+      "typeInfo": {
+        "overallCategory": "Equip",
+        "category": "Character",
+        "subCategory": "Face",
+        "lowItemId": 50000,
+        "highItemId": 59999
+      },
+      "region": "GMS",
+      "version": "235"
+    }
+  },
+  "visible": true,
+  "position": {
+    "x": -78,
+    "y": -56
+  },
+  "fhSnap": true,
+  "flipX": false,
+  "name": "",
+  "includeBackground": true
+}

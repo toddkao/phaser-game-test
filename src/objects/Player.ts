@@ -17,11 +17,7 @@ export class Player extends StateMachine {
   attackGroup;
 
   static preload(scene: Phaser.Scene) {
-    scene.load.atlas('swing', 'assets/swing.png', 'assets/swing.json');
-    scene.load.atlas('stab', 'assets/stab.png', 'assets/stab.json');
-    scene.load.atlas('walk', 'assets/walk.png', 'assets/walk.json');
-    scene.load.atlas('idle', 'assets/idle.png', 'assets/idle.json');
-    scene.load.atlas('jump', 'assets/jump.png', 'assets/jump.json');
+    scene.load.atlas('player1', 'assets/player1.png', 'assets/player1.json');
 
     scene.load.audio('spearattack', ['sfx/attack.mp3']);
   }
@@ -61,7 +57,7 @@ export class Player extends StateMachine {
     this.scene.anims.create({
       key: 'idle',
       frames: this.scene.anims.generateFrameNames(
-        'idle',
+        'player1',
         {
           start: 0,
           end: 3,
@@ -69,7 +65,7 @@ export class Player extends StateMachine {
           suffix: '.png',
         }
       ),
-      frameRate: 3,
+      frameRate: 5,
       repeat: -1,
     })
 
@@ -77,9 +73,9 @@ export class Player extends StateMachine {
     this.scene.anims.create({
       key: 'jump',
       frames: this.scene.anims.generateFrameNames(
-        'jump',
+        'player1',
         {
-          start: 1,
+          start: 0,
           end: 2,
           prefix: 'jump_',
           suffix: '.png',
@@ -92,11 +88,11 @@ export class Player extends StateMachine {
     this.scene.anims.create({
       key: 'swing',
       frames: this.scene.anims.generateFrameNames(
-        'swing',
+        'player1',
         {
-          start: 1,
+          start: 0,
           end: 3,
-          prefix: 'swing',
+          prefix: 'swingT1_',
           suffix: '.png',
         }
       ),
@@ -107,7 +103,7 @@ export class Player extends StateMachine {
     this.scene.anims.create({
       key: 'stab',
       frames: this.scene.anims.generateFrameNames(
-        'stab',
+        'player1',
         {
           start: 0,
           end: 2,
@@ -122,16 +118,17 @@ export class Player extends StateMachine {
     this.scene.anims.create({
       key: 'walk',
       frames: this.scene.anims.generateFrameNames(
-        'walk',
+        'player1',
         {
-          start: 1,
-          end: 5,
+          start: 0,
+          end: 4,
           prefix: 'walk1_',
           suffix: '.png',
         }
       ),
       frameRate: 5,
       repeat: -1,
+      yoyo: true,
     });
   }
 
@@ -176,7 +173,9 @@ export class Player extends StateMachine {
   }
 
   onWalkEnter() {
-    this.playerSprite.play('walk');
+    if (this.playerSprite.body.onFloor()) {
+      this.playerSprite.play('walk');
+    }
   }
 
   onWalkUpdate() {
@@ -184,9 +183,12 @@ export class Player extends StateMachine {
     if ((this.controls.jump.isDown) && this.playerSprite.body.onFloor()) {
       this.setState('jump');
     }
+
     if (this.controls.attack.isDown) {
       this.setState('swing');
-    } else {
+    }
+
+    if (!this.controls.left.isDown && !this.controls.right.isDown) {
       this.setState('idle');
     }
   }
@@ -198,24 +200,28 @@ export class Player extends StateMachine {
 
   onJumpUpdate() {
     this.handleLateralMovement();
-    if (this.playerSprite.body.onFloor()) {
-      if (this.playerSprite.body.velocity.x !== 0) {
-        this.setState('walk');
-      } else {
-        this.setState('idle');
+
+    this.scene.time.delayedCall(100, () => {
+      if (this.playerSprite.body.onFloor()) {
+        if (this.playerSprite.body.velocity.x !== 0) {
+          this.setState('walk');
+        } else {
+          this.setState('idle');
+        }
       }
-    }
+    })
   }
 
   handleLateralMovement() {
     if (this.controls.left.isDown) {
       this.playerSprite.setVelocityX(-300);
       this.playerSprite.flipX = false;
+      this.setState('walk');
     } else if (this.controls.right.isDown) {
       this.playerSprite.flipX = true;
       this.playerSprite.setVelocityX(300);
-    }
-    if (!this.controls.left.isDown && !this.controls.right.isDown) {
+      this.setState('walk');
+    } else if (!this.controls.left.isDown && !this.controls.right.isDown) {
       this.playerSprite.setVelocityX(0);
     }
 
