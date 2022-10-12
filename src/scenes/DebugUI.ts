@@ -1,5 +1,4 @@
 import Phaser from 'phaser';
-import config from '../config';
 import { Player } from '../objects/Player';
 import { GameScene } from './Game';
 
@@ -11,18 +10,14 @@ type Data = {
 
 export class DebugUI extends Phaser.Scene {
   debugText!: Phaser.GameObjects.Text;
-  data!: Data;
+  gameSceneData!: Data;
 
   constructor() {
     super('DebugUI');
   }
 
   init(data: Data) {
-    this.data = data;
-  }
-
-  preload() {
-
+    this.gameSceneData = data;
   }
 
   create() {
@@ -32,26 +27,25 @@ export class DebugUI extends Phaser.Scene {
   }
 
   update(t: number, dt: number) {
-    if (config.physics.arcade.debug) {
-      this.debugText.text = `
+    const { player1, player2 } = this.gameSceneData;
+    this.debugText.text = `
 FPS: ${this.game.loop.actualFps}
 `;
 
-      this.debugText.text += `
+    this.debugText.text += `
 ** Player 1 **
-state: ${this.data.player1.currentState?.name}
-position x: ${this.data.player1.position.x} y: ${this.data.player1.position.y}
+state: ${player1.currentState?.name}
+position x: ${player1.position.x} y: ${player1.position.y}
 
 ** Player 2 **
-state: ${this.data.player2.currentState?.name}
-position x: ${this.data.player2.position.x} y: ${this.data.player2.position.y}
+state: ${player2.currentState?.name}
+position x: ${player2.position.x} y: ${player2.position.y}
 `;
 
-      this.input.gamepad.getAll().forEach(gamepad => {
-        this.debugText.text += `
+    this.input.gamepad.getAll().forEach(gamepad => {
+      this.debugText.text += `
 ${gamepad.id} connected
 `;
-      });
-    }
+    });
   }
 }

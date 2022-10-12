@@ -1,5 +1,6 @@
 import Phaser from 'phaser';
 import { controls, Player } from '../objects/Player';
+import config from '../config';
 
 export class GameScene extends Phaser.Scene {
   player1!: Player;
@@ -42,7 +43,7 @@ export class GameScene extends Phaser.Scene {
       right: Phaser.Input.Keyboard.KeyCodes.L,
       left: Phaser.Input.Keyboard.KeyCodes.J,
     }) as controls;
-    
+
     this.player1 = new Player({
       id: 'player1',
       scene: this,
@@ -65,12 +66,14 @@ export class GameScene extends Phaser.Scene {
     this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, this.player2.onDamageTaken);
     this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, this.player1.onDamageTaken);
 
-    this.scene.launch('DebugUI', {
-      player1: this.player1,
-      player2: this.player2,
-      gameScene: this,
-    });
 
+    if (config.physics.arcade.debug) {
+      this.scene.launch('DebugUI', {
+        player1: this.player1,
+        player2: this.player2,
+        gameScene: this,
+      });
+    }
   }
 
   update(t: number, dt: number) {
