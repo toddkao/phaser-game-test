@@ -3,6 +3,7 @@ Thumbs.db
 .DS_Store
 .vscode
 
+public/maples.im
 
 # Vendors
 node_modules/
