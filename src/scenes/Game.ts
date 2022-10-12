@@ -25,10 +25,21 @@ export class GameScene extends Phaser.Scene {
     //   volume: 0.2
     // });
 
-    const map = this.add.tilemap('map');
+    const map = this.add.tilemap('map', 50, 36);
+
     const tileset = map.addTilesetImage("terrain", "terrain");
     this.tilemapLayer = map.createLayer("layer0", tileset);
-    this.tilemapLayer.setCollision(1, true);
+    this.tilemapLayer.setOrigin(500, 500);
+
+    const debugGraphics = this.add.graphics();
+
+    // map.renderDebugFull(debugGraphics);
+
+    // this.tilemapLayer.renderDebug(debugGraphics, {
+    //   collidingTileColor: new Phaser.Display.Color(243, 134, 48, 255), // Color of colliding tiles
+    // });
+
+    this.tilemapLayer.setCollision(1, true, false);
 
     const controls1 = this.input.keyboard.addKeys({
       attack: Phaser.Input.Keyboard.KeyCodes.F,

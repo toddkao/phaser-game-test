@@ -15,6 +15,8 @@ export class Player extends StateMachine {
   playerGroup: Phaser.GameObjects.Group;
   polearm: Phaser.GameObjects.Sprite;
 
+  onFloor = false;
+
   position: {
     x: number;
     y: number;
@@ -33,6 +35,8 @@ export class Player extends StateMachine {
   hpBar: any;
   controls: controls;
   damageTakenRecently: boolean = false;
+  isAttacking: boolean = false;
+
   attackGroup: Phaser.Physics.Arcade.Group;
 
   static preload(scene: Phaser.Scene) {
@@ -108,7 +112,7 @@ export class Player extends StateMachine {
       frameRate: 5,
       repeat: -1,
     });
-        
+
     this.playerSprite.anims.create({
       key: 'jump',
       frames: this.scene.anims.generateFrameNames(
@@ -150,7 +154,7 @@ export class Player extends StateMachine {
           suffix: '.png',
         }
       ),
-      frameRate: 5,
+      frameRate: 8,
       repeat: 0,
     });
 
@@ -165,8 +169,8 @@ export class Player extends StateMachine {
           suffix: '.png',
         }
       ),
-      frameRate: 5,
-      repeat: -1,
+      frameRate: 8,
+      repeat: 0,
     });
 
     this.playerSprite.anims.create({
@@ -197,7 +201,6 @@ export class Player extends StateMachine {
       ),
       frameRate: 5,
       repeat: -1,
-      yoyo: true,
     });
 
     this.polearm.anims.create({
@@ -213,18 +216,15 @@ export class Player extends StateMachine {
       ),
       frameRate: 5,
       repeat: -1,
-      yoyo: true,
     });
   }
 
   defineStates() {
     this.addState('idle', {
-      onEnter: () => this.onIdleEnter(),
-      onUpdate: () =>  this.onIdleUpdate(),
+      onUpdate: () => this.onIdleUpdate(),
     });
 
     this.addState('walk', {
-      onEnter: () => this.onWalkEnter(),
       onUpdate: () => this.onWalkUpdate(),
     });
 
@@ -233,9 +233,9 @@ export class Player extends StateMachine {
       onUpdate: () => this.onJumpUpdate(),
     });
 
-    this.addState('stab', {
-      onEnter: () => this.onStabEnter(),
-      onUpdate: () => this.onStabUpdate(),
+    this.addState('swing', {
+      onEnter: () => this.onSwingEnter(),
+      onUpdate: () => this.onSwingUpdate(),
     });
 
     // initialize state as idle
@@ -263,8 +263,11 @@ export class Player extends StateMachine {
   }
 
   onUpdate(dt: number) {
+    this.handlePlayerAction();
     this.position.x = this.playerSprite.x;
     this.position.y = this.playerSprite.y;
+    this.onFloor = this.playerSprite.body.onFloor() && this.playerSprite.body.velocity.y === 0;
+
     this.hpText.setPosition(this.playerSprite.x + 50, this.playerSprite.y - 30);
     this.polearm.setPosition(this.playerSprite.x + this.polearm.width / 2, this.playerSprite.y + this.polearm.height / 2);
     this.update(dt);
@@ -322,102 +325,109 @@ export class Player extends StateMachine {
     }
   }
 
-  onIdleEnter() {
-    this.playerGroup.playAnimation('idle');
-    this.playerSprite.setVelocityX(0);
-  }
-
   onIdleUpdate() {
-    this.handleLateralMovement();
-    if (this.controls.attack.isDown) {
-      this.playerSprite.setState('stab')
-    }
-    if ((this.controls.jump.isDown) && this.playerSprite.body.onFloor()) {
-      this.setState('jump');
-    }
-  }
-
-  onWalkEnter() {
-    if (this.playerSprite.body.onFloor()) {
-      this.playerGroup.playAnimation('walk');
+    if (this.onFloor) {
+      this.playAnimationIfNotAttacking('idle');
     }
   }
 
   onWalkUpdate() {
-    this.handleLateralMovement();
-    if ((this.controls.jump.isDown) && this.playerSprite.body.onFloor()) {
-      this.setState('jump');
-    }
-
-    if (this.controls.attack.isDown) {
-      this.setState('swing');
-    }
-
-    if (!this.controls.left.isDown && !this.controls.right.isDown) {
-      this.setState('idle');
+    if (this.onFloor) {
+      this.playAnimationIfNotAttacking('walk');
     }
   }
 
   onJumpEnter() {
-    this.playerGroup.playAnimation('jump');
-    this.playerSprite.body.setVelocityY(-500);
+    this.playAnimationIfNotAttacking('jump');
   }
 
   onJumpUpdate() {
-    this.handleLateralMovement();
-
-    this.scene.time.delayedCall(200, () => {
-      if (this.playerSprite.body.onFloor() && this.playerSprite.body.velocity.y === 0) {
-        if (this.playerSprite.body.velocity.x !== 0) {
-          this.setState('walk');
-        } else {
-          this.setState('idle');
-        }
-      }
-    })
+    this.playAnimationIfNotAttacking('jump');
+    if (this.onFloor) {
+      this.handleOnFloorAnimation();
+    }
   }
 
-  handleLateralMovement() {
+  handleOnFloorAnimation() {
+    if (!this.onFloor) return;
+
+    if (this.controls.left.isDown || this.controls.right.isDown) {
+      this.setState('walk');
+    } else {
+      this.setState('idle');
+    }
+  }
+
+  handlePlayerAction() {
     if (this.controls.left.isDown) {
       this.playerSprite.setVelocityX(-300);
       this.playerSprite.flipX = false;
       this.polearm.flipX = false;
-      this.setState('walk');
+      if (this.onFloor && !this.isAttacking) {
+        this.setState('walk');
+      }
     } else if (this.controls.right.isDown) {
       this.playerSprite.flipX = true;
       this.polearm.flipX = true;
       this.playerSprite.setVelocityX(300);
-      this.setState('walk');
-    }
-    if (!this.controls.left.isDown && !this.controls.right.isDown) {
-      this.playerSprite.setVelocityX(0);
+
+      if (this.onFloor && !this.isAttacking) {
+        this.setState('walk');
+      }
     }
 
-    if (this.controls.attack.isDown) {
-      this.setState('stab');
+    if ((this.controls.jump.isDown) && this.onFloor) {
+      this.playerSprite.body.setVelocityY(-500);
+      this.setState('jump');
+    } else if (!this.controls.left.isDown && !this.controls.right.isDown && this.onFloor && !this.isAttacking) {
+      this.playerSprite.setVelocityX(0);
+      this.setState('idle');
+    }
+
+    if (this.controls.attack.isDown && this.isAttacking === false) {
+      this.setState('swing');
     }
   }
 
-  onStabEnter() {
+  onSwingEnter() {
     this.playerGroup.playAnimation('swing');
+    this.isAttacking = true;
     this.scene.sound.play('spearattack', {
       volume: 0.2
     });
     // spawn hitbox
     this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
+
+    this.playerSprite.on('animationcomplete', () => {
+      console.log('finished swing attack');
+
+      if (this.onFloor) {
+        this.handleOnFloorAnimation();
+      } else {
+        this.setState('jump');
+      }
+
+      (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = false;
+      this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
+
+      this.isAttacking = false;
+
+    });
+
   }
 
-  onStabUpdate() {
+  onSwingUpdate() {
     // move hitbox to the correct position
     this.attackZone.x = this.polearm.x + 70 * (this.polearm.flipX ? 1 : -1);
     this.attackZone.y = this.polearm.y;
-    
-    if (this.playerSprite.anims.currentFrame.index === 3) {
-      this.setState('idle');
-      
-      (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = false;
-      this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
-    }
+    console.log('on swing update' + this.playerSprite.anims.currentFrame.index);
+  }
+
+  playAnimationIfNotAttacking(animationName: string) {
+    if (this.isAttacking) return;
+    if (this.playerSprite.anims.currentAnim.key === animationName) return;
+
+    this.playerGroup.playAnimation(animationName);
   }
 
   onDamageTaken = (object1: any, player: any) => {
@@ -431,7 +441,7 @@ export class Player extends StateMachine {
       const tween = this.scene.tweens.add({
         targets: this.playerSprite,
         alpha: 0.5,
-        ease: 'Cubic.easeOut',  
+        ease: 'Cubic.easeOut',
         duration: 500,
         repeat: -1,
         yoyo: true

@@ -36,10 +36,14 @@ FPS: ${this.game.loop.actualFps}
 ** Player 1 **
 state: ${player1.currentState?.name}
 position x: ${player1.position.x} y: ${player1.position.y}
+onFloor: ${player1.onFloor}
+isAttacking: ${player1.isAttacking}
 
 ** Player 2 **
 state: ${player2.currentState?.name}
 position x: ${player2.position.x} y: ${player2.position.y}
+onFloor: ${player2.onFloor}
+isAttacking: ${player2.isAttacking}
 `;
 
     this.input.gamepad.getAll().forEach(gamepad => {
