@@ -13,7 +13,7 @@ export class StateMachine {
   private states = new Map<string, IState>()
 
   private previousState?: IState
-  private currentState?: IState
+  currentState?: IState
   private isChangingState = false
   private changeStateQueue: string[] = []
 
