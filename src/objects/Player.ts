@@ -12,17 +12,16 @@ export class Player extends StateMachine {
   playerSprite!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   attackZone!: Phaser.GameObjects.GameObject;
   playerGroup!: Phaser.GameObjects.Group;
-  playerContainer!: Phaser.GameObjects.Container;
   polearm!: Phaser.GameObjects.Sprite;
+
   position: {
     x: number;
     y: number;
   }
 
 
-
+  enableTapJump = false;
   gamepad: Phaser.Input.Gamepad.Gamepad | undefined;
-
   scene: GameScene;
   hp: number = 100;
   hpText!: Phaser.GameObjects.Text;
@@ -224,7 +223,6 @@ export class Player extends StateMachine {
 
   onCreate() {
     this.playerGroup = this.scene.add.group();
-    this.playerContainer = this.scene.add.container();
     this.playerSprite = this.scene.physics.add.sprite(this.position.x, this.position.y, 'player1').setDepth(1);
     this.playerSprite.setOrigin(0, 0);
     this.playerSprite.setBodySize(50, 70, false);
@@ -257,17 +255,12 @@ export class Player extends StateMachine {
 
 
     this.attackGroup.add(this.attackZone);
-
   }
 
   onUpdate(dt: number) {
     this.hpText.setPosition(this.playerSprite.x + 50, this.playerSprite.y - 30);
     this.polearm.setPosition(this.playerSprite.x + this.polearm.width / 2, this.playerSprite.y + this.polearm.height / 2);
     this.update(dt);
-
-    // this.gamepad = this.scene.input.gamepad.getPad(0);
-
-    console.log(this.instanceId);
 
     if (!this.gamepad && this.scene.input.gamepad.getPad(this.instanceId)) {
       this.gamepad = this.scene.input.gamepad.getPad(this.instanceId);
@@ -305,10 +298,18 @@ export class Player extends StateMachine {
         this.controls.left.isDown = false;
       }
 
-      if (joyStick.y < -0.1) {
-        this.controls.jump.isDown = true;
+      if (this.enableTapJump) {
+        if (joyStick.y < -0.1) {
+          this.controls.jump.isDown = true;
+        } else {
+          this.controls.jump.isDown = false;
+        }
+      }
+
+      if (joyStick.y > 0.1) {
+        this.playerSprite.body.checkCollision.down = false;
       } else {
-        this.controls.jump.isDown = false;
+        this.playerSprite.body.checkCollision.down = true;
       }
     }
   }
@@ -379,7 +380,8 @@ export class Player extends StateMachine {
       this.polearm.flipX = true;
       this.playerSprite.setVelocityX(300);
       this.setState('walk');
-    } else if (!this.controls.left.isDown && !this.controls.right.isDown) {
+    }
+    if (!this.controls.left.isDown && !this.controls.right.isDown) {
       this.playerSprite.setVelocityX(0);
     }
 
@@ -393,10 +395,12 @@ export class Player extends StateMachine {
     this.scene.sound.play('spearattack', {
       volume: 0.2
     });
+    // spawn hitbox
     this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
   }
 
   onStabUpdate() {
+    // move hitbox to the correct position
     this.attackZone.x = this.polearm.x + 70 * (this.polearm.flipX ? 1 : -1);
     this.attackZone.y = this.polearm.y;
     

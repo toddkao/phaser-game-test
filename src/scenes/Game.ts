@@ -48,7 +48,7 @@ export class GameScene extends Phaser.Scene {
       scene: this,
       controls: controls1,
       position: {
-        x: 200,
+        x: 150,
         y: 400,
       }
     });
@@ -64,20 +64,6 @@ export class GameScene extends Phaser.Scene {
 
     this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, this.player2.onDamageTaken);
     this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, this.player1.onDamageTaken);
-
-    this.input.gamepad.once('connected', (pad: Phaser.Types.Input.Gamepad.Pad) => {
-      const gamepad = new Phaser.Input.Gamepad.Gamepad(this.input.gamepad, pad);
-
-      // const gamepadControls = this.input.keyboard.addKeys({
-      //   attack: gamepad.X,
-      //   jump: gamepad.A,
-      //   right: gamepad.R1,
-      //   left: gamepad.L1,
-      // }) as controls;
-
-      // this.player1.updateControls(gamepadControls);
-    });
-
 
   }
 
