@@ -6,6 +6,9 @@ export interface controls {
 }
 
 export class Player extends StateMachine {
+  static numberOfInstances = 0;
+  instanceId = 0;
+
   playerSprite!: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   attackZone!: Phaser.GameObjects.GameObject;
   playerGroup!: Phaser.GameObjects.Group;
@@ -15,6 +18,10 @@ export class Player extends StateMachine {
     x: number;
     y: number;
   }
+
+
+
+  gamepad: Phaser.Input.Gamepad.Gamepad | undefined;
 
   scene: GameScene;
   hp: number = 100;
@@ -46,6 +53,7 @@ export class Player extends StateMachine {
     }
   }) {
     super(scene, id);
+    this.instanceId = Player.numberOfInstances++;
     this.scene = scene;
     this.controls = controls;
     this.position = position;
@@ -227,7 +235,6 @@ export class Player extends StateMachine {
     this.hpText = this.scene.add.text(this.playerSprite.x + 50, this.playerSprite.y - 20, `HP: ${this.hp}`).setOrigin(0.5);
 
     this.attackZone = this.scene.add.rectangle(-1000, -1000, 70, 25, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
-    this.attackZone.setOrigin(0.5, 0.5);
 
     this.createAnimations();
 
@@ -257,6 +264,53 @@ export class Player extends StateMachine {
     this.hpText.setPosition(this.playerSprite.x + 50, this.playerSprite.y - 30);
     this.polearm.setPosition(this.playerSprite.x + this.polearm.width / 2, this.playerSprite.y + this.polearm.height / 2);
     this.update(dt);
+
+    // this.gamepad = this.scene.input.gamepad.getPad(0);
+
+    console.log(this.instanceId);
+
+    if (!this.gamepad && this.scene.input.gamepad.getPad(this.instanceId)) {
+      this.gamepad = this.scene.input.gamepad.getPad(this.instanceId);
+      this.gamepad.on('down', (gamepad: number) => {
+        console.log(gamepad);
+        if (gamepad === 0) {
+          this.controls.jump.isDown = true;
+        } else if (gamepad === 2) {
+          this.controls.attack.isDown = true;
+        }
+      });
+
+      this.gamepad.on('up', (gamepad: number) => {
+        if (gamepad === 0) {
+          this.controls.jump.isDown = false;
+        } else if (gamepad === 2) {
+          this.controls.attack.isDown = false;
+        }
+      });
+      console.log(this.gamepad, 'gamepad connected');
+      // if (this.gamepad.pad.)
+    }
+
+    const joyStick = this.gamepad?.leftStick ?? this.gamepad?.rightStick;
+
+    if (joyStick !== undefined) {
+      if (joyStick.x > 0.1) {
+        this.controls.right.isDown = true;
+      } else {
+        this.controls.right.isDown = false;
+      }
+      if (joyStick.x < -0.1) {
+        this.controls.left.isDown = true;
+      } else {
+        this.controls.left.isDown = false;
+      }
+
+      if (joyStick.y < -0.1) {
+        this.controls.jump.isDown = true;
+      } else {
+        this.controls.jump.isDown = false;
+      }
+    }
   }
 
   onIdleEnter() {
