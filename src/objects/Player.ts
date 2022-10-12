@@ -237,8 +237,8 @@ export class Player extends StateMachine {
   }
 
   onUpdate(dt: number) {
-    // this.hpText.setPosition(this.playerSprite.x + 50, this.playerSprite.y - 20);
-    // this.polearm.setPosition(this.playerSprite.x, this.playerSprite.y);
+    this.hpText.setPosition(this.playerSprite.x + 50, this.playerSprite.y - 20);
+    this.polearm.setPosition(this.playerSprite.x, this.playerSprite.y);
     this.update(dt);
   }
 
