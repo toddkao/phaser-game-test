@@ -11,6 +11,10 @@ export class Player extends StateMachine {
   playerGroup!: Phaser.GameObjects.Group;
   playerContainer!: Phaser.GameObjects.Container;
   polearm!: Phaser.GameObjects.Sprite;
+  position: {
+    x: number;
+    y: number;
+  }
 
   scene: GameScene;
   hp: number = 100;
@@ -27,10 +31,24 @@ export class Player extends StateMachine {
     scene.load.audio('spearattack', ['sfx/attack.mp3']);
   }
 
-  constructor(id: string, scene: GameScene, controls: controls) {
+  constructor({
+    id,
+    scene,
+    controls,
+    position,
+  }: {
+    id: string,
+    scene: GameScene,
+    controls: controls,
+    position: {
+      x: number,
+      y: number,
+    }
+  }) {
     super(scene, id);
     this.scene = scene;
     this.controls = controls;
+    this.position = position;
     this.onCreate();
 
 
@@ -58,23 +76,7 @@ export class Player extends StateMachine {
   }
 
   createAnimations() {
-    this.scene.anims.create({
-      key: 'polearmIdle',
-      defaultTextureKey: 'idle',
-      frames: this.scene.anims.generateFrameNames(
-        'polearm',
-        {
-          start: 0,
-          end: 3,
-          prefix: 'stand2_',
-          suffix: '.png',
-        }
-      ),
-      frameRate: 5,
-      repeat: -1,
-    });
-
-    this.scene.anims.create({
+    this.playerSprite.anims.create({
       key: 'idle',
       frames: this.scene.anims.generateFrameNames(
         'player1',
@@ -87,10 +89,24 @@ export class Player extends StateMachine {
       ),
       frameRate: 5,
       repeat: -1,
-    })
+    });
 
+    this.polearm.anims.create({
+      key: 'idle',
+      frames: this.scene.anims.generateFrameNames(
+        'polearm',
+        {
+          start: 0,
+          end: 3,
+          prefix: 'stand2_',
+          suffix: '.png',
+        }
+      ),
+      frameRate: 5,
+      repeat: -1,
+    });
         
-    this.scene.anims.create({
+    this.playerSprite.anims.create({
       key: 'jump',
       frames: this.scene.anims.generateFrameNames(
         'player1',
@@ -105,7 +121,7 @@ export class Player extends StateMachine {
       repeat: -1,
     });
 
-    this.scene.anims.create({
+    this.polearm.anims.create({
       key: 'jump',
       frames: this.scene.anims.generateFrameNames(
         'polearm',
@@ -120,14 +136,14 @@ export class Player extends StateMachine {
       repeat: -1,
     });
 
-    this.scene.anims.create({
+    this.playerSprite.anims.create({
       key: 'swing',
       frames: this.scene.anims.generateFrameNames(
         'player1',
         {
           start: 0,
-          end: 3,
-          prefix: 'swingP1_',
+          end: 4,
+          prefix: 'swingPF_',
           suffix: '.png',
         }
       ),
@@ -135,14 +151,14 @@ export class Player extends StateMachine {
       repeat: 0,
     });
 
-    this.scene.anims.create({
+    this.polearm.anims.create({
       key: 'swing',
       frames: this.scene.anims.generateFrameNames(
         'polearm',
         {
           start: 0,
-          end: 2,
-          prefix: 'swingP1_',
+          end: 4,
+          prefix: 'swingPF_',
           suffix: '.png',
         }
       ),
@@ -150,7 +166,7 @@ export class Player extends StateMachine {
       repeat: -1,
     });
 
-    this.scene.anims.create({
+    this.playerSprite.anims.create({
       key: 'stab',
       frames: this.scene.anims.generateFrameNames(
         'player1',
@@ -165,14 +181,14 @@ export class Player extends StateMachine {
       repeat: 0,
     });
 
-    this.scene.anims.create({
+    this.playerSprite.anims.create({
       key: 'walk',
       frames: this.scene.anims.generateFrameNames(
         'player1',
         {
           start: 0,
           end: 4,
-          prefix: 'walk1_',
+          prefix: 'walk2_',
           suffix: '.png',
         }
       ),
@@ -181,14 +197,14 @@ export class Player extends StateMachine {
       yoyo: true,
     });
 
-    this.scene.anims.create({
+    this.polearm.anims.create({
       key: 'walk',
       frames: this.scene.anims.generateFrameNames(
         'polearm',
         {
           start: 0,
           end: 4,
-          prefix: 'walk1_',
+          prefix: 'walk2_',
           suffix: '.png',
         }
       ),
@@ -199,21 +215,23 @@ export class Player extends StateMachine {
   }
 
   onCreate() {
-    this.createAnimations();
-
     this.playerGroup = this.scene.add.group();
     this.playerContainer = this.scene.add.container();
-    this.playerSprite = this.scene.physics.add.sprite(200, 400, 'player1').setDepth(1);
+    this.playerSprite = this.scene.physics.add.sprite(this.position.x, this.position.y, 'player1').setDepth(1);
     this.playerSprite.setOrigin(0, 0);
     this.playerSprite.setBodySize(50, 70, false);
     this.playerSprite.body.collideWorldBounds = true;
 
     this.polearm = this.scene.add.sprite(this.playerSprite.x, this.playerSprite.y, 'polearm').setDepth(0);
-    this.polearm.setOrigin(0, 0);
 
     this.hpText = this.scene.add.text(this.playerSprite.x + 50, this.playerSprite.y - 20, `HP: ${this.hp}`).setOrigin(0.5);
 
-    this.playerGroup.add(this.playerSprite).add(this.polearm).add(this.hpText);
+    this.attackZone = this.scene.add.rectangle(-1000, -1000, 70, 25, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+    this.attackZone.setOrigin(0.5, 0.5);
+
+    this.createAnimations();
+
+    this.playerGroup.add(this.playerSprite).add(this.polearm).add(this.hpText).add(this.attackZone);
 
     this.playerGroup.scaleXY(1, 1);
     this.playerGroup.playAnimation('idle');
@@ -230,15 +248,14 @@ export class Player extends StateMachine {
       allowGravity: false,
     })
 
-    this.attackZone = this.scene.add.rectangle(-1000, -1000, 70, 25, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+
     this.attackGroup.add(this.attackZone);
-  
 
   }
 
   onUpdate(dt: number) {
-    this.hpText.setPosition(this.playerSprite.x + 50, this.playerSprite.y - 20);
-    this.polearm.setPosition(this.playerSprite.x, this.playerSprite.y);
+    this.hpText.setPosition(this.playerSprite.x + 50, this.playerSprite.y - 30);
+    this.polearm.setPosition(this.playerSprite.x + this.polearm.width / 2, this.playerSprite.y + this.polearm.height / 2);
     this.update(dt);
   }
 
@@ -250,7 +267,7 @@ export class Player extends StateMachine {
   onIdleUpdate() {
     this.handleLateralMovement();
     if (this.controls.attack.isDown) {
-      this.playerSprite.setState('swing')
+      this.playerSprite.setState('stab')
     }
     if ((this.controls.jump.isDown) && this.playerSprite.body.onFloor()) {
       this.setState('jump');
@@ -301,9 +318,11 @@ export class Player extends StateMachine {
     if (this.controls.left.isDown) {
       this.playerSprite.setVelocityX(-300);
       this.playerSprite.flipX = false;
+      this.polearm.flipX = false;
       this.setState('walk');
     } else if (this.controls.right.isDown) {
       this.playerSprite.flipX = true;
+      this.polearm.flipX = true;
       this.playerSprite.setVelocityX(300);
       this.setState('walk');
     } else if (!this.controls.left.isDown && !this.controls.right.isDown) {
@@ -324,8 +343,8 @@ export class Player extends StateMachine {
   }
 
   onStabUpdate() {
-    this.attackZone.x = this.playerSprite.x + (this.playerSprite.flipX ? 50 : -70);
-    this.attackZone.y = this.playerSprite.y + 60;
+    this.attackZone.x = this.polearm.x + 70 * (this.polearm.flipX ? 1 : -1);
+    this.attackZone.y = this.polearm.y;
     
     if (this.playerSprite.anims.currentFrame.index === 3) {
       this.setState('idle');

@@ -43,11 +43,27 @@ export class GameScene extends Phaser.Scene {
       left: Phaser.Input.Keyboard.KeyCodes.J,
     }) as controls;
     
-    this.player1 = new Player('player1', this, controls1);
-    // this.player2 = new Player('player2', this, controls2);
+    this.player1 = new Player({
+      id: 'player1',
+      scene: this,
+      controls: controls1,
+      position: {
+        x: 200,
+        y: 400,
+      }
+    });
+    this.player2 = new Player({
+      id: 'player2',
+      scene: this,
+      controls: controls2,
+      position: {
+        x: 1200,
+        y: 400,
+      }
+    });
 
-    // this.physics.add.overlap(this.player1.attackZone, this.player1.playerSprite, this.player2.onDamageTaken);
-    // this.physics.add.overlap(this.player2.attackZone, this.player2.playerSprite, this.player1.onDamageTaken);
+    this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, this.player2.onDamageTaken);
+    this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, this.player1.onDamageTaken);
 
     this.input.gamepad.once('connected', (pad: Phaser.Types.Input.Gamepad.Pad) => {
       const gamepad = new Phaser.Input.Gamepad.Gamepad(this.input.gamepad, pad);
@@ -67,6 +83,6 @@ export class GameScene extends Phaser.Scene {
 
   update(t: number, dt: number) {
     this.player1.onUpdate(dt);
-    // this.player2.onUpdate(dt);
+    this.player2.onUpdate(dt);
   }
 }
