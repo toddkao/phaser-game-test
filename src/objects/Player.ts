@@ -84,7 +84,7 @@ export class Player extends StateMachine {
 
     this.playerSprite = this.scene.physics.add.sprite(this.position.x, this.position.y, 'player1').setDepth(1);
     this.polearm = this.scene.add.sprite(this.playerSprite.x, this.playerSprite.y, 'polearm').setDepth(0);
-    this.hpText = this.scene.add.text(this.playerSprite.x - 60, this.playerSprite.y - 110, `HP: ${this.hp}`);
+    this.hpText = this.scene.add.text(this.playerSprite.x + 50, this.playerSprite.y - 20, `HP: ${this.hp}`).setOrigin(0.5);
     this.attackZone = this.scene.add.rectangle(-1000, -1000, 70, 25, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
 
     this.createAnimations();
@@ -289,6 +289,7 @@ export class Player extends StateMachine {
   }
 
   create() {
+    this.playerSprite.setOrigin(0, 0);
     this.playerSprite.setBodySize(50, 70, false);
 
     this.playerSprite.body.collideWorldBounds = true;
@@ -317,6 +318,7 @@ export class Player extends StateMachine {
           this.setState('jump');
         }
 
+        this.controls.attack.isDown = false;
         (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = false;
         this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
 
@@ -329,16 +331,21 @@ export class Player extends StateMachine {
 
   onUpdate(dt: number) {
     // better jumping
-    if (this.currentState?.name === 'jump') {
-      if (this.playerSprite.body.velocity.y > 0 && !this.startedFallingFromJump) {
-        this.playerSprite.body.velocity.y += (this.playerSprite.body.velocity.y * (this.fallMultiplier - 1));
-        this.startedFallingFromJump = true;
-      } else if (this.playerSprite.body.velocity.y < 0 && !this.controls.jump.isDown) {
 
-        this.playerSprite.body.velocity.y += (this.playerSprite.body.velocity.y * (this.lowJumpMultiplier - 1));
-        this.startedFallingFromJump = false;
-      }
+    if (this.playerSprite.body.velocity.y > 0 && !this.startedFallingFromJump) {
+      this.startedFallingFromJump = true;
+      this.playerSprite.body.velocity.y += (this.playerSprite.body.velocity.y * (this.fallMultiplier - 1));
+    } else if (this.playerSprite.body.velocity.y < 0 && !this.controls.jump.isDown) {
+      this.playerSprite.body.velocity.y += (this.playerSprite.body.velocity.y * (this.lowJumpMultiplier - 1));
+      this.startedFallingFromJump = false;
     }
+
+    if (this.onFloor && this.playerSprite.body.velocity.x > 0 && !this.controls.right.isDown) {
+      this.playerSprite.body.velocity.x -= 50;
+    } else if (this.onFloor && this.playerSprite.body.velocity.x < 0  && !this.controls.left.isDown) {
+      this.playerSprite.body.velocity.x += 50;
+    }
+
 
     this.handlePlayerAction();
 
@@ -351,14 +358,13 @@ export class Player extends StateMachine {
 
     this.onFloor = this.playerSprite.body.onFloor() && this.playerSprite.body.velocity.y === 0;
 
-    this.hpText.setPosition(this.playerSprite.x - 60, this.playerSprite.y - 110);
-    this.polearm.setPosition(this.playerSprite.x, this.playerSprite.y);
+    this.hpText.setPosition(this.playerSprite.x + 50, this.playerSprite.y - 30);
+    this.polearm.setPosition(this.playerSprite.x + this.polearm.width / 2, this.playerSprite.y + this.polearm.height / 2);
     this.update(dt);
 
     if (!this.gamepad && this.scene.input.gamepad.getPad(this.instanceId)) {
       this.gamepad = this.scene.input.gamepad.getPad(this.instanceId);
       this.gamepad.on('down', (gamepad: number) => {
-        console.log(gamepad);
         if (gamepad === 0) {
           this.controls.jump.isDown = true;
         } else if (gamepad === 2) {
@@ -432,12 +438,23 @@ export class Player extends StateMachine {
 
   onJumpEnter() {
     this.playAnimationIfNotAttacking('jump');
+    // this.playerSprite.body.velocity.y = -150;
   }
 
   onJumpUpdate() {
     this.playAnimationIfNotAttacking('jump');
+    // this.playerSprite.body.setMaxSpeed(50);
     if (this.onFloor) {
+      this.controls.jump.isDown = false;
       this.handleOnFloorAnimation();
+    } else {
+      // console.log(Math.abs(this.playerSprite.body.velocity.y), this.playerSprite.body.maxSpeed);
+      // if (Math.abs(this.playerSprite.body.velocity.y) < this.playerSprite.body.maxSpeed) {
+      //   this.playerSprite.body.velocity.y +=  -10;
+      //   console.log('start accelerating');
+      // } else {
+      //   console.log('stopped accelerating');
+      // }
     }
   }
 
@@ -453,28 +470,34 @@ export class Player extends StateMachine {
 
   handlePlayerAction() {
     if (this.damageTakenRecently) return;
-    if (this.controls.left.isDown) {
-      this.playerSprite.setVelocityX(-300);
-      this.playerSprite.flipX = false;
-      this.polearm.flipX = false;
-      if (this.onFloor && !this.isAttacking) {
-        this.setState('walk');
-      }
-    } else if (this.controls.right.isDown) {
-      this.playerSprite.flipX = true;
-      this.polearm.flipX = true;
-      this.playerSprite.setVelocityX(300);
+    if (!this.isAttacking && this.onFloor) {
 
-      if (this.onFloor && !this.isAttacking) {
-        this.setState('walk');
+      if (this.controls.left.isDown) {
+        this.playerSprite.setVelocityX(-600);
+        this.playerSprite.flipX = false;
+        this.polearm.flipX = false;
+        if (this.onFloor) {
+          this.setState('walk');
+        }
+      } else if (this.controls.right.isDown) {
+        this.playerSprite.flipX = true;
+        this.polearm.flipX = true;
+        this.playerSprite.setVelocityX(600);
+
+        if (this.onFloor) {
+          this.setState('walk');
+        }
       }
+
     }
 
     if ((this.controls.jump.isDown) && this.onFloor) {
-      this.playerSprite.body.setVelocityY(-400);
+      this.playerSprite.body.setVelocityY(-450);
+      // this.playerSprite.body.setAllowGravity(false);
+      // this.playerSprite.body.setAccelerationY(600);
+      console.log('jump');
       this.setState('jump');
     } else if (!this.controls.left.isDown && !this.controls.right.isDown && this.onFloor && !this.isAttacking && !this.damageTakenRecently) {
-      this.playerSprite.setVelocityX(0);
       this.setState('idle');
     }
 
@@ -484,19 +507,32 @@ export class Player extends StateMachine {
   }
 
   onSwingEnter() {
+
     this.playerGroup.playAnimation('swing');
+
     this.isAttacking = true;
     this.scene.sound.play('spearattack', {
       volume: 0.2
     });
     // spawn hitbox
     this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
+    this.attackZone.x = 999999;
+    this.attackZone.y = 999999;
   }
 
   onSwingUpdate() {
     // move hitbox to the correct position
-    this.attackZone.x = this.polearm.x + 70 * (this.polearm.flipX ? 1 : -1);
-    this.attackZone.y = this.polearm.y;
+
+    console.log(this.playerSprite.anims.currentFrame.index);
+
+    if (this.playerSprite.anims.currentFrame.index > 3) {
+      this.attackZone.x = this.polearm.x + 70 * (this.polearm.flipX ? 1 : -1);
+      this.attackZone.y = this.polearm.y;
+    }
+
+    // if (this.playerSprite.anims.currentFrame.index === 5) {
+    //   this.setState('idle');
+    // }
   }
 
   playAnimationIfNotAttacking(animationName: string) {
@@ -506,17 +542,17 @@ export class Player extends StateMachine {
     this.playerGroup.playAnimation(animationName);
   }
 
-  onDamageTaken(enemy: any, player: any) {
+  onDamageTaken(player: Player) {
     let rotationTween;
     if (!this.damageTakenRecently) {
       this.hp -= 10;
       this.hpText.text = `HP: ${this.hp}`;
       this.damageTakenRecently = true;
       this.setState('alert');
-      if (enemy.x > this.playerSprite.x) {
+
+      if (player.playerSprite.x > this.playerSprite.x) {
         console.log('enemy is to the right, should launch to the left');
-        this.playerSprite.body.velocity.x = -300;
-        this.playerSprite.body.velocity.y = -300;
+        this.playerSprite.body.velocity.x -= 500;
         this.playerSprite.flipX = true;
 
         // this.playerSprite.rotation = Phaser.Math.Angle.RotateTo(
@@ -527,8 +563,7 @@ export class Player extends StateMachine {
         // this.playerSprite.setRotation(-Math.PI / 4);
       } else {
         console.log('enemy is to the left, should launch to the right');
-        this.playerSprite.body.velocity.x = 300;
-        this.playerSprite.body.velocity.y = -300;
+        this.playerSprite.body.velocity.x += 500;
         this.playerSprite.flipX = false;
       }
 
@@ -543,7 +578,7 @@ export class Player extends StateMachine {
         yoyo: true
       });
 
-      this.scene.time.delayedCall(800, () => {
+      this.scene.time.delayedCall(300, () => {
         this.damageTakenRecently = false;
         this.playerSprite.alpha = 1;
         this.scene.tweens.remove(tween);

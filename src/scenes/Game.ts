@@ -76,9 +76,9 @@ export class GameScene extends Phaser.Scene {
 
     // this.cameras.main.startFollow(this.player1.playerSprite, true);
 
-    this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, this.player1.onDamageTaken, undefined, this.player1);
+    this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, () => this.player1.onDamageTaken(this.player2), undefined, this.player1);
 
-    this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, this.player2.onDamageTaken, undefined, this.player2);
+    this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, () => this.player2.onDamageTaken(this.player1), undefined, this.player2);
 
     if (config.physics.arcade.debug) {
       this.scene.launch('DebugUI', {
