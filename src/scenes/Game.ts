@@ -69,14 +69,15 @@ export class GameScene extends Phaser.Scene {
       scene: this,
       controls: controls2,
       position: {
-        x: 1200,
+        x: 1300,
         y: 400,
       }
     });
 
+    // this.cameras.main.zoomTo(1);
+
     this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, this.player2.onDamageTaken);
     this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, this.player1.onDamageTaken);
-
 
     if (config.physics.arcade.debug) {
       this.scene.launch('DebugUI', {

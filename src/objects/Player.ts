@@ -22,6 +22,10 @@ export class Player extends StateMachine {
     y: number;
   }
 
+  fallMultiplier = 50;
+  lowJumpMultiplier = 0.1;
+  startedFallingFromJump = false;
+
   enableTapJump = false;
   enableDropBelowTerrain = false;
   gamepad: Phaser.Input.Gamepad.Gamepad | undefined;
@@ -245,6 +249,7 @@ export class Player extends StateMachine {
   create() {
     this.playerSprite.setOrigin(0, 0);
     this.playerSprite.setBodySize(50, 70, false);
+
     this.playerSprite.body.collideWorldBounds = true;
 
     this.playerGroup.add(this.playerSprite).add(this.polearm).add(this.hpText).add(this.attackZone);
@@ -263,6 +268,17 @@ export class Player extends StateMachine {
   }
 
   onUpdate(dt: number) {
+    this.playerSprite.setPosition(Math.round(this.playerSprite.x), Math.round(this.playerSprite.y));
+
+    // better jumping
+    if (this.playerSprite.body.velocity.y > 0 && !this.startedFallingFromJump) {
+      this.playerSprite.body.setVelocityY(this.playerSprite.body.velocity.y * (this.fallMultiplier));
+      this.startedFallingFromJump = true;
+    } else if (this.playerSprite.body.velocity.y < 0 && !this.controls.jump.isDown) {
+      this.playerSprite.body.setVelocityY(this.playerSprite.body.velocity.y * (this.lowJumpMultiplier));
+      this.startedFallingFromJump = false;
+    }
+
     this.handlePlayerAction();
     this.position.x = this.playerSprite.x;
     this.position.y = this.playerSprite.y;
