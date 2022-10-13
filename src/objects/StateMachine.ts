@@ -2,7 +2,8 @@ interface IState {
   name: string
   onEnter?: () => void
   onUpdate?: (dt: number) => void
-  onExit?: () => void
+  onExit?: () => void,
+  startTime: number,
 }
 
 let idCount = 0
@@ -44,7 +45,8 @@ export class StateMachine {
       name,
       onEnter: config?.onEnter?.bind(context),
       onUpdate: config?.onUpdate?.bind(context),
-      onExit: config?.onExit?.bind(context)
+      onExit: config?.onExit?.bind(context),
+      startTime: 0,
     })
 
     return this
