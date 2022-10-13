@@ -342,7 +342,7 @@ export class Player extends StateMachine {
 
     if (this.onFloor && this.playerSprite.body.velocity.x > 0 && !this.controls.right.isDown) {
       this.playerSprite.body.velocity.x -= 50;
-    } else if (this.onFloor && this.playerSprite.body.velocity.x < 0  && !this.controls.left.isDown) {
+    } else if (this.onFloor && this.playerSprite.body.velocity.x < 0 && !this.controls.left.isDown) {
       this.playerSprite.body.velocity.x += 50;
     }
 
@@ -470,26 +470,29 @@ export class Player extends StateMachine {
 
   handlePlayerAction() {
     if (this.damageTakenRecently) return;
-    if (!this.isAttacking && this.onFloor) {
 
-      if (this.controls.left.isDown) {
-        this.playerSprite.setVelocityX(-600);
+
+    if (this.controls.left.isDown) {
+      this.playerSprite.setVelocityX(-600);
+      if (this.onFloor) {
+        this.setState('walk');
+      }
+      if (!this.isAttacking) {
         this.playerSprite.flipX = false;
         this.polearm.flipX = false;
-        if (this.onFloor) {
-          this.setState('walk');
-        }
-      } else if (this.controls.right.isDown) {
+      }
+    } else if (this.controls.right.isDown) {
+      this.playerSprite.setVelocityX(600);
+
+      if (this.onFloor) {
+        this.setState('walk');
+      }
+      if (!this.isAttacking) {
         this.playerSprite.flipX = true;
         this.polearm.flipX = true;
-        this.playerSprite.setVelocityX(600);
-
-        if (this.onFloor) {
-          this.setState('walk');
-        }
       }
-
     }
+
 
     if ((this.controls.jump.isDown) && this.onFloor) {
       this.playerSprite.body.setVelocityY(-450);
