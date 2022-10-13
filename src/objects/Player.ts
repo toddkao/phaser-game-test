@@ -474,22 +474,23 @@ export class Player extends StateMachine {
 
     if (this.controls.left.isDown) {
       this.playerSprite.setVelocityX(-600);
-      if (this.onFloor) {
-        this.setState('walk');
-      }
+
       if (!this.isAttacking) {
         this.playerSprite.flipX = false;
         this.polearm.flipX = false;
+        if (this.onFloor ) {
+          this.setState('walk');
+        }
       }
     } else if (this.controls.right.isDown) {
       this.playerSprite.setVelocityX(600);
 
-      if (this.onFloor) {
-        this.setState('walk');
-      }
       if (!this.isAttacking) {
         this.playerSprite.flipX = true;
         this.polearm.flipX = true;
+        if (this.onFloor) {
+          this.setState('walk');
+        }
       }
     }
 
