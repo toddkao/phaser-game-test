@@ -15,7 +15,9 @@ export class GameScene extends Phaser.Scene {
   preload() {
     Player.preload(this);
     this.load.image('terrain', 'assets/terrain.png');
-    this.load.tilemapTiledJSON('map', 'tilemap/tilemap.json');
+    this.load.image('terrain1', 'assets/terrain1.png');
+    
+    this.load.tilemapTiledJSON('map', 'tilemap/map1.json');
 
     this.load.audio('henesys', ['bgm/RestNPeace.mp3']);
   }
@@ -27,8 +29,8 @@ export class GameScene extends Phaser.Scene {
 
     const map = this.add.tilemap('map', 50, 36);
 
-    const tileset = map.addTilesetImage("terrain", "terrain");
-    this.tilemapLayer = map.createLayer("layer0", tileset);
+    const tileset = map.addTilesetImage("terrain", "terrain1");
+    this.tilemapLayer = map.createLayer("layer1", tileset);
     this.tilemapLayer.setOrigin(500, 500);
 
     const debugGraphics = this.add.graphics();
@@ -43,6 +45,7 @@ export class GameScene extends Phaser.Scene {
 
     const controls1 = this.input.keyboard.addKeys({
       attack: Phaser.Input.Keyboard.KeyCodes.F,
+      swing:  Phaser.Input.Keyboard.KeyCodes.D,
       jump: Phaser.Input.Keyboard.KeyCodes.UP,
       right: Phaser.Input.Keyboard.KeyCodes.RIGHT,
       left: Phaser.Input.Keyboard.KeyCodes.LEFT,
@@ -50,6 +53,7 @@ export class GameScene extends Phaser.Scene {
 
     const controls2 = this.input.keyboard.addKeys({
       attack: Phaser.Input.Keyboard.KeyCodes.H,
+      swing: Phaser.Input.Keyboard.KeyCodes.P,
       jump: Phaser.Input.Keyboard.KeyCodes.I,
       right: Phaser.Input.Keyboard.KeyCodes.L,
       left: Phaser.Input.Keyboard.KeyCodes.J,
@@ -76,9 +80,9 @@ export class GameScene extends Phaser.Scene {
 
     // this.cameras.main.startFollow(this.player1.playerSprite, true);
 
-    this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, () => this.player1.onDamageTaken(this.player2), undefined, this.player1);
+    this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, (attack) => this.player1.onDamageTaken(attack, this.player2), undefined, this.player1);
 
-    this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, () => this.player2.onDamageTaken(this.player1), undefined, this.player2);
+    this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, (attack) => this.player2.onDamageTaken(attack, this.player1), undefined, this.player2);
 
     if (config.physics.arcade.debug) {
       this.scene.launch('DebugUI', {
