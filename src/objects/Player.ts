@@ -235,9 +235,9 @@ export class Player extends StateMachine {
 
 
 
-    // this.playerSprite.body.checkCollision.up = false;
-    // this.playerSprite.body.checkCollision.left = false;
-    // this.playerSprite.body.checkCollision.right = false;
+    this.playerSprite.body.checkCollision.up = false;
+    this.playerSprite.body.checkCollision.left = false;
+    this.playerSprite.body.checkCollision.right = false;
 
     this.playerSprite.body.collideWorldBounds = true;
 
@@ -538,7 +538,7 @@ export class Player extends StateMachine {
     console.log('stab frame: ' + currentFrame);
 
     // move hitbox to the correct position
-    if (currentFrame > 2) {
+    if (currentFrame > 1) {
       this.attackZone.x = this.playerSprite.x + 110 * (this.playerSprite.flipX ? -1 : 1);
       this.attackZone.y = this.playerSprite.y + 30;
     }
@@ -570,7 +570,7 @@ export class Player extends StateMachine {
     console.log('swing frame: ' + currentFrame);
 
     // move hitbox to the correct position
-    if (currentFrame > 3) {
+    if (currentFrame > 2) {
       this.attackZone.x = this.playerSprite.x + 70 * (this.playerSprite.flipX ? -1 : 1);
       this.attackZone.y = this.playerSprite.y - 30;
     }
