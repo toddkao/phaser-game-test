@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { Player } from '../objects/Player';
+import { Player } from '../classes/Player';
 import { GameScene } from './Game';
 
 type Data = {
@@ -21,7 +21,7 @@ export class DebugUI extends Phaser.Scene {
   }
 
   create() {
-    this.debugText = this.add.text(0, 0, `FPS: ${this.game.loop.actualFps}`, {
+    this.debugText = this.add.text(0, 0, ``, {
       fontSize: '20px',
     }).setPosition(20, 20);
   }
@@ -37,6 +37,7 @@ FPS: ${this.game.loop.actualFps}
 state: ${player1.currentState?.name}
 position x: ${player1.position.x} y: ${player1.position.y}
 velocity x: ${player1.velocity.x} y: ${player1.velocity.y}
+origin: x: ${player1.sprite.originX} y: ${player1.sprite.originY}
 isFastFalling: ${player1.isFastFalling}
 onFloor: ${player1.onFloor}
 isAttacking: ${player1.isAttacking}

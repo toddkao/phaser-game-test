@@ -1,21 +1,30 @@
 import { GameScene } from "../scenes/Game";
 import { StateMachine } from "./StateMachine";
 import config from '../config';
+import { PlayerAnimation } from "./PlayerAnimation";
+
+type PlayerProps = {
+  id: string;
+  scene: GameScene;
+  controls: controls;
+  position: {
+    x: number;
+    y: number;
+  };
+};
 
 export interface controls {
   [index: string]: Phaser.Input.Keyboard.Key;
-}
+};
 
 export class Player extends StateMachine {
   static numberOfInstances = 0;
   instanceId = 0;
 
-  playerSprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
+  sprite: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody;
   attackZone: Phaser.GameObjects.GameObject;
-  // playerGroup: Phaser.GameObjects.Group;
-  // polearm: Phaser.GameObjects.Sprite;
-
   onFloor = false;
+  playerAnimation: PlayerAnimation;
 
   position: {
     x: number;
@@ -50,11 +59,7 @@ export class Player extends StateMachine {
   attackGroup: Phaser.Physics.Arcade.Group;
 
   static preload(scene: Phaser.Scene) {
-    // scene.load.atlas('player1', 'assets/player1.png', 'assets/player1.json');
-    // scene.load.atlas('polearm', 'assets/polearm.png', 'assets/polearm.json');
     scene.load.atlas('sword', 'assets/sword.png', 'assets/sword.json');
-    // scene.load.atlas('sword', 'assets/swords2.png', 'assets/swords2.json');
-
     scene.load.audio('spearattack', ['sfx/swordattack.mp3']);
   }
 
@@ -63,15 +68,7 @@ export class Player extends StateMachine {
     scene,
     controls,
     position,
-  }: {
-    id: string,
-    scene: GameScene,
-    controls: controls,
-    position: {
-      x: number,
-      y: number,
-    }
-  }) {
+  }: PlayerProps) {
     super(scene, id);
     this.instanceId = Player.numberOfInstances++;
 
@@ -85,9 +82,11 @@ export class Player extends StateMachine {
       allowGravity: false,
     })
 
-    this.playerSprite = this.scene.physics.add.sprite(this.position.x, this.position.y, 'sword').setDepth(1);
-    this.hpText = this.scene.add.text(this.playerSprite.x, this.playerSprite.y - this.playerSprite.height, `HP: ${this.hp}`).setOrigin(0.5);
+    this.sprite = this.scene.physics.add.sprite(this.position.x, this.position.y, 'sword').setDepth(1);
+    this.hpText = this.scene.add.text(this.sprite.x, this.sprite.y - this.sprite.height, `HP: ${this.hp}`).setOrigin(0.5);
     this.attackZone = this.scene.add.rectangle(-1000, -1000, 140, 25, 0xffffff, 0) as unknown as Phaser.Types.Physics.Arcade.ImageWithDynamicBody;
+
+    this.playerAnimation = new PlayerAnimation(this, scene, this.sprite, 'sword');
 
     this.createAnimations();
     this.create();
@@ -95,98 +94,71 @@ export class Player extends StateMachine {
   }
 
   createAnimations() {
-    this.playerSprite.anims.create({
+
+    this.playerAnimation.createFrame({
       key: 'alert',
-      frames: this.scene.anims.generateFrameNames(
-        'sword',
-        {
-          start: 0,
-          end: 3,
-          prefix: 'alert_',
-          suffix: '.png',
-        }
-      ),
-      frameRate: 5,
-      repeat: -1,
+      numberOfFrames: 4,
+      offset: [{
+        x: 10,
+        y: 0,
+      }]
     });
 
-    this.playerSprite.anims.create({
-      key: 'idle',
-      frames: this.scene.anims.generateFrameNames(
-        'sword',
-        {
-          start: 1,
-          end: 3,
-          prefix: 'stand1_',
-          suffix: '.png',
-        }
-      ),
-      frameRate: 5,
-      repeat: -1,
+    this.playerAnimation.createFrame({
+      key: 'stand1',
+      numberOfFrames: 4,
+      bodySize: [{
+        x: 40,
+        y: 70,
+      }],
+      offset: [{
+        x: 10,
+        y: 0,
+      }]
     });
 
+    this.playerAnimation.createFrame({
+      key: 'walk1',
+      numberOfFrames: 5,
+      offset: [{
+        x: 10,
+        y: 0,
+      }]
+    });
 
-
-    this.playerSprite.anims.create({
+    this.playerAnimation.createFrame({
       key: 'jump',
-      frames: this.scene.anims.generateFrameNames(
-        'sword',
-        {
-          start: 0,
-          end: 1,
-          prefix: 'jump_',
-          suffix: '.png',
-        }
-      ),
-      frameRate: 5,
-      repeat: -1,
+      numberOfFrames: 2,
+      offset: [{
+        x: 10,
+        y: 0,
+      }]
     });
 
-
-
-    this.playerSprite.anims.create({
-      key: 'swing',
-      frames: this.scene.anims.generateFrameNames(
-        'sword',
-        {
-          start: 0,
-          end: 4,
-          prefix: 'swingO2_',
-          suffix: '.png',
-        }
-      ),
-      frameRate: 4,
-      repeat: 0,
+    this.playerAnimation.createFrame({
+      key: 'swingO2',
+      numberOfFrames: 5,
+      dontRepeat: true,
+      bodySize: [{
+        x: 40,
+        y: 70,
+      }],
+      offset: [{
+        x: 80,
+        y: 21,
+      }],
+      isAttack: true,
     });
 
-    this.playerSprite.anims.create({
-      key: 'stab',
-      frames: this.scene.anims.generateFrameNames(
-        'sword',
-        {
-          start: 0,
-          end: 2,
-          prefix: 'stabO1_',
-          suffix: '.png',
-        }
-      ),
-      frameRate: 5,
-      repeat: 0,
-    });
-
-    this.playerSprite.anims.create({
-      key: 'walk',
-      frames: this.scene.anims.generateFrameNames(
-        'sword',
-        {
-          start: 0,
-          end: 4,
-          prefix: 'walk1_',
-          suffix: '.png',
-        }
-      ),
-      frameRate: 5,
-      repeat: -1,
+    this.playerAnimation.createFrame({
+      key: 'stabO1',
+      numberOfFrames: 3,
+      dontRepeat: true,
+      offset: [{
+        x: 80,
+        y: -5,
+      }],
+      isAttack: true,
     });
 
 
@@ -209,11 +181,29 @@ export class Player extends StateMachine {
     this.addState('swing', {
       onEnter: () => this.onSwingEnter(),
       onUpdate: () => this.onSwingUpdate(),
+      onExit: () => {
+        this.isAttacking = false;
+        this.controls.swing.isDown = false;
+        if (this.onFloor) {
+          this.handleOnFloorAnimation();
+        } else {
+          this.setState('jump');
+        }
+      }
     });
 
     this.addState('stab', {
       onEnter: () => this.onStabEnter(),
       onUpdate: () => this.onStabUpdate(),
+      onExit: () => {
+        this.isAttacking = false;
+        this.controls.attack.isDown = false;
+        if (this.onFloor) {
+          this.handleOnFloorAnimation();
+        } else {
+          this.setState('jump');
+        }
+      }
     });
 
 
@@ -227,21 +217,18 @@ export class Player extends StateMachine {
   }
 
   create() {
-    this.playerSprite.setScale(2, 2);
-    // this.playerSprite.setOffset(0, 0);
-    this.playerSprite.setBodySize(50, 70);
-    this.playerSprite.setOffset(30, 40);
+    this.sprite.setScale(2, 2);
+
+    this.setPlayerFacingRight(true);
     this.hpText.setScale(2, 2);
 
+    // this.playerSprite.body.checkCollision.up = false;
+    // this.playerSprite.body.checkCollision.left = false;
+    // this.playerSprite.body.checkCollision.right = false;
 
+    this.sprite.body.collideWorldBounds = true;
 
-    this.playerSprite.body.checkCollision.up = false;
-    this.playerSprite.body.checkCollision.left = false;
-    this.playerSprite.body.checkCollision.right = false;
-
-    this.playerSprite.body.collideWorldBounds = true;
-
-    this.playerSprite.play('idle');
+    this.playerAnimation.playAnimation('stand1');
 
     // this.playerGroup.add(this.playerSprite).add(this.polearm).add(this.hpText).add(this.attackZone);
 
@@ -249,46 +236,29 @@ export class Player extends StateMachine {
     // this.playerGroup.playAnimation('idle');
 
     // Add collision between scene map and player
-    this.scene.physics.add.collider(this.scene.tilemapLayer, this.playerSprite);
-
-
+    this.scene.physics.add.collider(this.scene.tilemapLayer, this.sprite);
 
     this.attackGroup.add(this.attackZone);
 
-    this.playerSprite.on('animationcomplete', (event: any) => {
-      if (event.key === 'stab') {
-        console.log('finished stab attack');
+  }
 
-        if (this.onFloor) {
-          this.handleOnFloorAnimation();
-        } else {
-          this.setState('jump');
-        }
+  update(dt: number) {
+    this.handleGamepadControls();
+    this.handlePlayerAction();
+    this.handleFriction();
+    this.betterJumping();
 
-        this.controls.attack.isDown = false;
-        this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
+    // Keep position and velocity synced with sprite 
+    this.position.x = this.sprite.x;
+    this.position.y = this.sprite.y;
 
-        this.isAttacking = false;
-      }
+    this.velocity.x = this.sprite.body.velocity.x;
+    this.velocity.y = this.sprite.body.velocity.y;
 
-      if (event.key === 'swing') {
-        console.log('finished swing attack');
+    this.onFloor = this.sprite.body.onFloor() && this.sprite.body.velocity.y === 0;
 
-        if (this.onFloor) {
-          this.handleOnFloorAnimation();
-        } else {
-          this.setState('jump');
-        }
-
-        this.controls.attack.isDown = false;
-        (this.attackZone.body as Phaser.Physics.Arcade.Body).enable = false;
-        this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
-
-        this.isAttacking = false;
-      }
-
-    });
-
+    this.hpText.setPosition(this.sprite.x, this.sprite.y - this.sprite.height);
+    this.onUpdate(dt);
   }
 
   handleGamepadControls() {
@@ -356,9 +326,9 @@ export class Player extends StateMachine {
 
       if (this.enableDropBelowTerrain) {
         if (joyStick.y > this.deadZoneY) {
-          this.playerSprite.body.checkCollision.down = false;
+          this.sprite.body.checkCollision.down = false;
         } else {
-          this.playerSprite.body.checkCollision.down = true;
+          this.sprite.body.checkCollision.down = true;
         }
       }
 
@@ -370,49 +340,29 @@ export class Player extends StateMachine {
 
   betterJumping() {
     // better jumping
-    if (this.playerSprite.body.velocity.y > 0 && !this.startedFallingFromJump) {
+    if (this.sprite.body.velocity.y > 0 && !this.startedFallingFromJump) {
       this.startedFallingFromJump = true;
       if (this.isFastFalling) {
-        this.playerSprite.body.velocity.y += this.playerSprite.body.velocity.y * 120;
+        this.sprite.body.velocity.y += this.sprite.body.velocity.y * 120;
       } else {
-        this.playerSprite.body.velocity.y += (this.playerSprite.body.velocity.y * this.fallMultiplier - 1);
+        this.sprite.body.velocity.y += (this.sprite.body.velocity.y * this.fallMultiplier - 1);
       }
-    } else if (this.playerSprite.body.velocity.y < 0 && !this.controls.jump.isDown) {
-      this.playerSprite.body.velocity.y += (this.playerSprite.body.velocity.y * (this.lowJumpMultiplier - 1));
+    } else if (this.sprite.body.velocity.y < 0 && !this.controls.jump.isDown) {
+      this.sprite.body.velocity.y += (this.sprite.body.velocity.y * (this.lowJumpMultiplier - 1));
       this.startedFallingFromJump = false;
     }
   }
 
-  onUpdate(dt: number) {
-    this.handleGamepadControls();
-
-    if (this.onFloor && this.playerSprite.body.velocity.x > 0 && !this.controls.right.isDown) {
-      this.playerSprite.body.velocity.x -= 50;
-    } else if (this.onFloor && this.playerSprite.body.velocity.x < 0 && !this.controls.left.isDown) {
-      this.playerSprite.body.velocity.x += 50;
+  handleFriction() {
+    if (this.onFloor && this.sprite.body.velocity.x > 0 && !this.controls.right.isDown) {
+      this.sprite.body.velocity.x -= 50;
+    } else if (this.onFloor && this.sprite.body.velocity.x < 0 && !this.controls.left.isDown) {
+      this.sprite.body.velocity.x += 50;
     }
-
-
-    this.handlePlayerAction();
-
-    // Keep position and velocity synced with sprite 
-    this.position.x = this.playerSprite.x;
-    this.position.y = this.playerSprite.y;
-
-    this.velocity.x = this.playerSprite.body.velocity.x;
-    this.velocity.y = this.playerSprite.body.velocity.y;
-
-    this.onFloor = this.playerSprite.body.onFloor() && this.playerSprite.body.velocity.y === 0;
-
-    this.hpText.setPosition(this.playerSprite.x, this.playerSprite.y - this.playerSprite.height);
-    // this.polearm.setPosition(this.playerSprite.x + this.polearm.width / 2, this.playerSprite.y + this.polearm.height / 2);
-    this.update(dt);
-
-    this.betterJumping();
   }
 
   onAlertEnter() {
-    this.playAnimationIfNotAttacking('alert');
+    this.playerAnimation.playAnimation('alert');
   }
 
   onAlertUpdate() {
@@ -423,23 +373,23 @@ export class Player extends StateMachine {
 
   onIdleUpdate() {
     if (this.onFloor) {
-      this.playAnimationIfNotAttacking('idle');
+      this.playerAnimation.playAnimation('stand1');
     }
   }
 
   onWalkUpdate() {
     if (this.onFloor) {
-      this.playAnimationIfNotAttacking('walk');
+      this.playerAnimation.playAnimation('walk1');
     }
   }
 
   onJumpEnter() {
-    this.playAnimationIfNotAttacking('jump');
+    this.playerAnimation.playAnimation('jump');
     // this.playerSprite.body.velocity.y = -150;
   }
 
   onJumpUpdate() {
-    this.playAnimationIfNotAttacking('jump');
+    this.playerAnimation.playAnimation('jump');
     // this.playerSprite.body.setMaxSpeed(50);
     if (this.onFloor) {
       this.controls.jump.isDown = false;
@@ -473,20 +423,20 @@ export class Player extends StateMachine {
     }
 
     if (this.controls.left.isDown) {
-      this.playerSprite.setVelocityX(-600);
+      this.sprite.setVelocityX(-600);
 
       if (!this.isAttacking) {
-        this.flipPlayer(true);
+        this.setPlayerFacingRight(false);
 
-        if (this.onFloor ) {
+        if (this.onFloor) {
           this.setState('walk');
         }
       }
     } else if (this.controls.right.isDown) {
-      this.playerSprite.setVelocityX(600);
+      this.sprite.setVelocityX(600);
 
       if (!this.isAttacking) {
-        this.flipPlayer(false);
+        this.setPlayerFacingRight(true);
 
         if (this.onFloor) {
           this.setState('walk');
@@ -496,15 +446,14 @@ export class Player extends StateMachine {
 
 
     if ((this.controls.jump.isDown) && this.onFloor) {
-      this.playerSprite.body.setVelocityY(-450);
+      this.sprite.body.setVelocityY(-450);
       // this.playerSprite.body.setAllowGravity(false);
       // this.playerSprite.body.setAccelerationY(600);
-      console.log('jump');
       this.setState('jump');
     } else if (!this.controls.left.isDown && !this.controls.right.isDown && this.onFloor && !this.isAttacking && !this.damageTakenRecently) {
       this.setState('idle');
-    } 
-    
+    }
+
     if (this.controls.attack.isDown && this.isAttacking === false) {
       this.setState('stab');
     } else if (this.controls.swing.isDown && this.isAttacking === false) {
@@ -513,7 +462,7 @@ export class Player extends StateMachine {
   }
 
   onStabEnter() {
-    this.playerSprite.play('stab');
+    this.playerAnimation.playAnimation('stabO1');
     if (this.currentState) {
       this.currentState.startTime = new Date().getTime();
     }
@@ -522,30 +471,33 @@ export class Player extends StateMachine {
     this.scene.sound.play('spearattack', {
       volume: 0.2
     });
-    // spawn hitbox
-    this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
-    this.attackZone.damage = 5;
-    this.attackZone.body.height = 25;
-    this.attackZone.body.width = 100;
-    this.attackZone.x = 999999;
-    this.attackZone.y = 999999;
+
   }
 
   onStabUpdate() {
     const currentTime = new Date().getTime();
     const currentMS = currentTime - (this.currentState?.startTime ?? 0);
-    const currentFrame = Math.floor(currentMS / 144);
+    const currentFrame = Math.floor(currentMS / 16);
     console.log('stab frame: ' + currentFrame);
 
     // move hitbox to the correct position
-    if (currentFrame > 1) {
-      this.attackZone.x = this.playerSprite.x + 110 * (this.playerSprite.flipX ? -1 : 1);
-      this.attackZone.y = this.playerSprite.y + 30;
+    if (currentFrame === 15) {
+      // spawn hitbox
+
+      this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
+      this.attackZone.damage = 5;
+      this.attackZone.body.height = 25;
+      this.attackZone.body.width = 130;
+
+      this.attackZone.x = this.sprite.x + 110 * (this.sprite.flipX ? 1 : -1);
+      this.attackZone.y = this.sprite.y + 30;
+    } else if (currentFrame > 20) {
+      this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
     }
   }
 
   onSwingEnter() {
-    this.playerSprite.play('swing');
+    this.playerAnimation.playAnimation('swingO2');
     if (this.currentState) {
       this.currentState.startTime = new Date().getTime();
     }
@@ -554,38 +506,29 @@ export class Player extends StateMachine {
     this.scene.sound.play('spearattack', {
       volume: 0.2
     });
-    // spawn hitbox
-    this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
-    this.attackZone.damage = 10;
-    this.attackZone.body.height = 150;
-    this.attackZone.body.width = 140;
-    this.attackZone.x = 999999;
-    this.attackZone.y = 999999;
   }
 
   onSwingUpdate() {
     const currentTime = new Date().getTime();
     const currentMS = currentTime - (this.currentState?.startTime ?? 0);
-    const currentFrame = Math.floor(currentMS / 144);
+    const currentFrame = Math.floor(currentMS / 16);
     console.log('swing frame: ' + currentFrame);
 
     // move hitbox to the correct position
-    if (currentFrame > 2) {
-      this.attackZone.x = this.playerSprite.x + 70 * (this.playerSprite.flipX ? -1 : 1);
-      this.attackZone.y = this.playerSprite.y - 30;
+    if (currentFrame === 30) {
+      // spawn hitbox
+      this.scene.physics.world.add((this.attackZone.body as Phaser.Physics.Arcade.Body));
+      this.attackZone.damage = 10;
+      this.attackZone.body.height = 150;
+      this.attackZone.body.width = 140;
+      this.attackZone.x = this.sprite.x + 70 * (this.sprite.flipX ? 1 : -1);
+      this.attackZone.y = this.sprite.y - 30;
+    } else if (currentFrame > 40) {
+      this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
     }
   }
 
-
-  playAnimationIfNotAttacking(animationName: string) {
-    if (this.isAttacking) return;
-    if (this.playerSprite.anims.currentAnim.key === animationName) return;
-
-    this.playerSprite.play(animationName);
-  }
-
   onDamageTaken(attack: Phaser.Types.Physics.Arcade.GameObjectWithBody, player: Player) {
-    let rotationTween;
     if (!this.damageTakenRecently) {
       console.log(attack);
       this.hp -= attack.damage;
@@ -596,19 +539,19 @@ export class Player extends StateMachine {
       this.damageTakenRecently = true;
       this.setState('alert');
 
-      if (player.playerSprite.x > this.playerSprite.x) {
-        this.playerSprite.body.velocity.x -= 500;
-        this.flipPlayer(false);
+      if (player.sprite.x > this.sprite.x) {
+        this.sprite.body.velocity.x -= 500;
+        this.setPlayerFacingRight(false);
       } else {
         console.log('enemy is to the left, should launch to the right');
-        this.playerSprite.body.velocity.x += 500;
-        this.flipPlayer(true);
+        this.sprite.body.velocity.x += 500;
+        this.setPlayerFacingRight(true);
       }
 
-      this.playerSprite.setTint(0xFF0000);
+      this.sprite.setTint(0xFF0000);
 
       const tween = this.scene.tweens.add({
-        targets: this.playerSprite,
+        targets: this.sprite,
         alpha: 0.5,
         ease: 'Cubic.easeOut',
         duration: 500,
@@ -618,22 +561,18 @@ export class Player extends StateMachine {
 
       this.scene.time.delayedCall(60 * (attack.damage ?? 5), () => {
         this.damageTakenRecently = false;
-        this.playerSprite.alpha = 1;
+        this.sprite.alpha = 1;
         this.scene.tweens.remove(tween);
-        this.playerSprite.setTint(0xffffff);
+        this.sprite.setTint(0xffffff);
       })
     }
   }
 
-  flipPlayer(flip: boolean) {
-    if (flip) {
-      this.playerSprite.flipX = true;
-      this.playerSprite.setBodySize(40, 70);
-      this.playerSprite.setOffset(70, 40);
+  setPlayerFacingRight(right: boolean) {
+    if (right) {
+      this.sprite.flipX = true;
     } else {
-      this.playerSprite.flipX = false;
-      this.playerSprite.setBodySize(40, 70);
-      this.playerSprite.setOffset(30, 40);
+      this.sprite.flipX = false;
     }
   }
 }

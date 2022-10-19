@@ -85,7 +85,7 @@ export class StateMachine {
     this.isChangingState = false
   }
 
-  update(dt: number) {
+  onUpdate(dt: number) {
     if (this.changeStateQueue.length > 0) {
       this.setState(this.changeStateQueue.shift()!)
       return

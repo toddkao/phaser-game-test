@@ -1,5 +1,5 @@
 import Phaser from 'phaser';
-import { controls, Player } from '../objects/Player';
+import { controls, Player } from '../classes/Player';
 import config from '../config';
 
 export class GameScene extends Phaser.Scene {
@@ -7,6 +7,8 @@ export class GameScene extends Phaser.Scene {
   player2!: Player;
 
   tilemapLayer!: Phaser.Tilemaps.TilemapLayer;
+
+  gameStartTime = new Date().getTime();
 
   constructor() {
     super('GameScene');
@@ -16,6 +18,10 @@ export class GameScene extends Phaser.Scene {
     Player.preload(this);
     this.load.image('terrain', 'assets/terrain.png');
     this.load.image('terrain1', 'assets/terrain1.png');
+
+    this.load.image('test', 'creature/dragon.png');
+    this.load.json('test', 'creature/dragon.json');
+
     
     this.load.tilemapTiledJSON('map', 'tilemap/map1.json');
 
@@ -28,6 +34,8 @@ export class GameScene extends Phaser.Scene {
     // });
 
     const map = this.add.tilemap('map', 50, 36);
+
+    // const test = this.add.creature(450, 350, 'test', 'test');
 
     const tileset = map.addTilesetImage("terrain", "terrain1");
     this.tilemapLayer = map.createLayer("layer1", tileset);
@@ -80,9 +88,9 @@ export class GameScene extends Phaser.Scene {
 
     // this.cameras.main.startFollow(this.player1.playerSprite, true);
 
-    this.physics.add.overlap(this.player2.attackZone, this.player1.playerSprite, (attack) => this.player1.onDamageTaken(attack, this.player2), undefined, this.player1);
+    this.physics.add.overlap(this.player2.attackZone, this.player1.sprite, (attack) => this.player1.onDamageTaken(attack, this.player2), undefined, this.player1);
 
-    this.physics.add.overlap(this.player1.attackZone, this.player2.playerSprite, (attack) => this.player2.onDamageTaken(attack, this.player1), undefined, this.player2);
+    this.physics.add.overlap(this.player1.attackZone, this.player2.sprite, (attack) => this.player2.onDamageTaken(attack, this.player1), undefined, this.player2);
 
     if (config.physics.arcade.debug) {
       this.scene.launch('DebugUI', {
@@ -93,8 +101,8 @@ export class GameScene extends Phaser.Scene {
     }
   }
 
-  update(t: number, dt: number) {
-    this.player1.onUpdate(dt);
-    this.player2.onUpdate(dt);
+  update(time: number, delta: number) {
+    this.player1.update(delta);
+    this.player2.update(delta);
   }
 }

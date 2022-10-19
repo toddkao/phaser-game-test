@@ -1,7 +1,7 @@
 import Phaser from 'phaser';
 
 export default {
-  type: Phaser.AUTO,
+  type: Phaser.WEBGL,
   parent: 'game',
   physics: {
     default: 'arcade',
@@ -13,6 +13,9 @@ export default {
   input: {
     gamepad: true,
   },
+  // render: {
+  //   pixelArt: true,
+  // },
   scale: {
     width: 1920,
     height: 1090,
@@ -20,6 +23,8 @@ export default {
     autoCenter: Phaser.Scale.CENTER_BOTH
   },
   fps: {
-    target: 144,
+    min: 60,
+    target: 60,
+    forceSetTimeOut: true,
   }
 };
