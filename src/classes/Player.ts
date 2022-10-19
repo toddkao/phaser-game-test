@@ -184,6 +184,7 @@ export class Player extends StateMachine {
       onExit: () => {
         console.log('exit swing');
         this.controls.swing.isDown = false;
+        this.isAttacking = false;
         if (this.onFloor) {
           this.handleOnFloorAnimation();
         } else {
@@ -198,6 +199,7 @@ export class Player extends StateMachine {
       onExit: () => {
         console.log('exit stab');
         this.controls.attack.isDown = false;
+        this.isAttacking = false;
         if (this.onFloor) {
           this.handleOnFloorAnimation();
         } else {
@@ -222,9 +224,9 @@ export class Player extends StateMachine {
     this.setPlayerFacingRight(true);
     this.hpText.setScale(2, 2);
 
-    // this.playerSprite.body.checkCollision.up = false;
-    // this.playerSprite.body.checkCollision.left = false;
-    // this.playerSprite.body.checkCollision.right = false;
+    this.sprite.body.checkCollision.up = false;
+    this.sprite.body.checkCollision.left = false;
+    this.sprite.body.checkCollision.right = false;
 
     this.sprite.body.collideWorldBounds = true;
 
@@ -493,8 +495,10 @@ export class Player extends StateMachine {
 
       this.attackZone.x = this.sprite.x + 110 * (this.sprite.flipX ? 1 : -1);
       this.attackZone.y = this.sprite.y + 30;
-    } else if (currentFrame > 20) {
+    } else if (currentFrame >= 20) {
       this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
+    } else if (currentFrame >= 40) {
+      this.isAttacking = false;
     }
   }
 
@@ -527,6 +531,8 @@ export class Player extends StateMachine {
       this.attackZone.y = this.sprite.y - 30;
     } else if (currentFrame > 40) {
       this.scene.physics.world.remove(this.attackZone.body as Phaser.Physics.Arcade.Body);
+    } else if (currentFrame >= 66) {
+      this.isAttacking = false;
     }
   }
 

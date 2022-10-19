@@ -79,10 +79,12 @@ export class PlayerAnimation {
         this.player.isAttacking = false;
 
         // update logic to manage setting animation when exiting one
-        if (!this.player.controls.left.isDown && !this.player.controls.right.isDown && this.player.onFloor && !this.player.damageTakenRecently) {
-          this.player.setState('idle')
+        if (this.player.controls.left.isDown || this.player.controls.right.isDown && this.player.onFloor && !this.player.damageTakenRecently) {
+          this.player.setState('walk');
+        } else if (!this.player.controls.left.isDown && !this.player.controls.right.isDown && this.player.onFloor && !this.player.damageTakenRecently) {
+          this.player.setState('idle');
         } else if (!this.player.onFloor) {
-          this.player.setState('jump')
+          this.player.setState('jump');
         }
       }
     });
