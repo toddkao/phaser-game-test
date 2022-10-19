@@ -99,8 +99,8 @@ export class Player extends StateMachine {
       key: 'alert',
       numberOfFrames: 4,
       offset: [{
-        x: 10,
-        y: 0,
+        x: 35,
+        y: -3,
       }]
     });
 
