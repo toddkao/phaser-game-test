@@ -182,7 +182,7 @@ export class Player extends StateMachine {
       onEnter: () => this.onSwingEnter(),
       onUpdate: () => this.onSwingUpdate(),
       onExit: () => {
-        this.isAttacking = false;
+        console.log('exit swing');
         this.controls.swing.isDown = false;
         if (this.onFloor) {
           this.handleOnFloorAnimation();
@@ -196,7 +196,7 @@ export class Player extends StateMachine {
       onEnter: () => this.onStabEnter(),
       onUpdate: () => this.onStabUpdate(),
       onExit: () => {
-        this.isAttacking = false;
+        console.log('exit stab');
         this.controls.attack.isDown = false;
         if (this.onFloor) {
           this.handleOnFloorAnimation();
@@ -449,7 +449,9 @@ export class Player extends StateMachine {
       this.sprite.body.setVelocityY(-450);
       // this.playerSprite.body.setAllowGravity(false);
       // this.playerSprite.body.setAccelerationY(600);
-      this.setState('jump');
+      if (!this.isAttacking) {
+        this.setState('jump');
+      }
     } else if (!this.controls.left.isDown && !this.controls.right.isDown && this.onFloor && !this.isAttacking && !this.damageTakenRecently) {
       this.setState('idle');
     }
@@ -463,11 +465,11 @@ export class Player extends StateMachine {
 
   onStabEnter() {
     this.playerAnimation.playAnimation('stabO1');
+    this.isAttacking = true;
     if (this.currentState) {
       this.currentState.startTime = new Date().getTime();
     }
 
-    this.isAttacking = true;
     this.scene.sound.play('spearattack', {
       volume: 0.2
     });
@@ -498,11 +500,11 @@ export class Player extends StateMachine {
 
   onSwingEnter() {
     this.playerAnimation.playAnimation('swingO2');
+    this.isAttacking = true;
     if (this.currentState) {
       this.currentState.startTime = new Date().getTime();
     }
 
-    this.isAttacking = true;
     this.scene.sound.play('spearattack', {
       volume: 0.2
     });

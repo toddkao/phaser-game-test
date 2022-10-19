@@ -71,6 +71,21 @@ export class PlayerAnimation {
         this.sprite.setOffset(offsetForCurrentFrame.x, offsetForCurrentFrame.y);
       }
     });
+
+    this.sprite.on(ANIMATION_COMPLETE_EVENT, (event: any) => {
+      const isAttack = this.animationDataMap[event.key]?.isAttack;
+      if (isAttack) {
+        console.log('isattacking false')
+        this.player.isAttacking = false;
+
+        // update logic to manage setting animation when exiting one
+        if (!this.player.controls.left.isDown && !this.player.controls.right.isDown && this.player.onFloor && !this.player.damageTakenRecently) {
+          this.player.setState('idle')
+        } else if (!this.player.onFloor) {
+          this.player.setState('jump')
+        }
+      }
+    });
   }
 
 
@@ -101,8 +116,7 @@ export class PlayerAnimation {
 
   playAnimation(animationKey: string) {
     const currentAnimationKey = this.sprite.anims.currentAnim?.key;
-
-    const locked = this.player.isAttacking && !this.sprite.anims.currentFrame.isLast;
+    const locked = this.player.isAttacking && this.sprite.anims.currentFrame.isLast === false;
 
     // don't play animation if already playing it
     if (currentAnimationKey === animationKey) return;
